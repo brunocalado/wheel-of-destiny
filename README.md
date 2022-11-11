@@ -9,6 +9,7 @@ Select a random token in the scene.
 - You can select a group of tokens and the module will pick one for you.
 - If you don't select any token, the module will read all tokens in the scene. There are some options to modify this behavior.
 - The select token will be display in the chat or a dialog.
+- You can play a sound.
 
 ## Macros and Integration
 You can trigger Wheel of Destiny with the following code. This can be used by macros/modules.
