@@ -19,7 +19,7 @@ You can trigger Wheel of Destiny with the following code. This can be used by ma
 ```
 
 ## Keybindings
-You can used keybindings to trigger too. Use **F**. You can change it on **Controls**.
+You can use keybindings to trigger too. Use **F**. You can change it on **Controls**.
 
 # Instalation
 You can install this module using the manifest: https://raw.githubusercontent.com/brunocalado/wheel_of_destiny/main/module.json
@@ -35,6 +35,7 @@ You can see changes at [CHANGELOG](CHANGELOG.md).
 - JB2A: https://jb2a.com/
 - Roll of Fate module. RIP
 
-# License and Assets
-- Code license at [LICENSE](LICENSE).
+# License
+- Code license at [LICENSE](LICENSE.md).
+- Assets license at [LICENSE](LICENSE_ASSETS.md).
 - Icons: https://game-icons.net/
