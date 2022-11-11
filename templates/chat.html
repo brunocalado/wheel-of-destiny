@@ -1,0 +1,21 @@
+<style>   
+</style>  
+
+<div>
+  <p>{{topMessage}}</p>
+</div>
+
+<div style="font-size: 1.8em; margin: 1em 0; text-align: center;">
+  <img src="{{imagePath}}" style="max-width:6em;">
+  <br>
+  <div>{{tokenName}}</div>
+</div>
+
+{{#if this.displaySelected}}
+  <details>
+    <summary>Token List</summary>
+    <ul>
+      {{{tokensNameList}}}
+    </ul>
+  </details>
+{{/if}}

@@ -1,0 +1,45 @@
+{   
+  "id": "wheel_of_destiny",   
+  "title": "☯ Wheel Of Destiny",
+  "description": "Randomly select a token.",   
+  "authors": [
+    {
+      "name": "Mestre Digital",
+      "url": "https://www.youtube.com/c/MestreDigital",
+      "flags": {}
+    }
+  ],
+  "version": "0.0.5",
+  "compatibility": {
+    "minimum": "10",
+    "verified": "10"
+  },
+  
+  "scripts": [],  
+	"esmodules": ["./scripts/init.js"],
+
+  "packs": [],
+
+  "styles": [],
+
+  "languages": [
+     
+  ],
+
+  "relationships": {
+    "requires": [
+      {
+        "id": "socketlib",
+        "type": "module",
+        "manifest": "https://raw.githubusercontent.com/manuelVo/foundryvtt-socketlib/master/module.json"
+      }
+    ]
+  },
+  
+  "socket": true,
+  
+  "url": "https://github.com/brunocaladowheel-of-destiny",
+  "manifest": "https://raw.githubusercontent.com/brunocaladowheel-of-destiny/main/module.json",  
+  "download": "https://codeload.github.com/brunocaladowheel-of-destiny/zip/main"
+  
+}
