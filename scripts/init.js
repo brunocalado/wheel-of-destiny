@@ -86,6 +86,16 @@ Hooks.once('init', () => {
     default: 'You has been choosen!',
     type: String
   });
+
+  // call this with: game.settings.get("wheel-of-destiny", "playAnimation")
+  game.settings.register(moduleName, "playAnimation", {
+    name: 'Play Animation', // 
+    hint: 'Check this to play a simple a animation over the token. YOU MUST HAVE SEQUENCER ENABLED TO USE THIS.', // 
+    scope: 'world',
+    config: true,
+    type: Boolean,
+    default: false
+  });
   
   // call this with: game.settings.get("wheel-of-destiny", "playSound")
   game.settings.register(moduleName, "playSound", {

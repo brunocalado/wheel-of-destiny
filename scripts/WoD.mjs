@@ -13,6 +13,8 @@ export default class WoD {
     const flagChat = true;
     const flagDialog = game.settings.get("wheel-of-destiny", "hasDialog");
     const flagSound = game.settings.get("wheel-of-destiny", "playSound");
+    const flagAnimation = game.settings.get("wheel-of-destiny", "playAnimation");
+    
     // --------------------------------------------------
     // Error handling
     if (tokens.length<1) {      
@@ -32,6 +34,7 @@ export default class WoD {
     }
 
     const rand = Math.floor(Math.random() * tokens.length);
+    const selectedToken = tokens[rand];
     const tokenName = tokens[rand].document.name;
     const imagePath = tokens[rand].document.texture.src;
   
@@ -74,7 +77,15 @@ export default class WoD {
         loop: false
       }, true);       
     }
-
+    
+    if (flagAnimation) {
+      if (!game.modules.get("sequencer")?.active) { 
+        ui.notifications.error("Please, activate Sequencer module!");
+        return;
+      }      
+      this.sequencerAnimation(selectedToken);
+    }
+    
   } // END  
 
   //-----------------------------------------------
@@ -121,5 +132,41 @@ export default class WoD {
       img.src = path;
     });
   }  
+
+  //-----------------------------------------------
+  // 
+  async sequencerAnimation(selectedToken) {
+    let effectScale = 0.25;
+    let tokenSize;
+    const animation = "modules/jb2a_patreon/Library/Generic/UI/Indicator01_02_Regular_BlueGreen_400x400.webm";
+    tokenSize = (selectedToken.document.width + selectedToken.document.height) /2;
+    new Sequence()
+    .effect()
+      .file(animation)
+      .atLocation(selectedToken)
+      .scale(tokenSize * effectScale)
+      .waitUntilFinished()
+    .effect()
+      .file(animation)
+      .atLocation(selectedToken)
+      .scale(tokenSize * effectScale)
+      .waitUntilFinished()
+    .effect()
+      .file(animation)
+      .atLocation(selectedToken)
+      .scale(tokenSize * effectScale)
+      .waitUntilFinished()
+    .effect()
+      .file(animation)
+      .atLocation(selectedToken)
+      .scale(tokenSize * effectScale)
+      .waitUntilFinished()
+    .effect()
+      .file(animation)
+      .atLocation(selectedToken)
+      .scale(tokenSize * effectScale)
+      .waitUntilFinished()      
+    .play();
+  }
 
 } // END CLASS

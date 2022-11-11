@@ -10,6 +10,7 @@ Select a random token in the scene.
 - If you don't select any token, the module will read all tokens in the scene. There are some options to modify this behavior.
 - The select token will be display in the chat or a dialog.
 - You can pick a folder with sounds. Then, one random sound will be played when you run the wheel.
+- There will be an animation played over the selected token.
 
 ## Macros and Integration
 You can trigger Wheel of Destiny with the following code. This can be used by macros/modules.
@@ -31,6 +32,7 @@ You can install this module using the manifest: https://raw.githubusercontent.co
 You can see changes at [CHANGELOG](CHANGELOG.md).
 
 # Acknowledgements
+- JB2A: https://jb2a.com/
 - Roll of Fate module. RIP
 
 # License and Assets
