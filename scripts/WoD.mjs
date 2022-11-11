@@ -61,8 +61,12 @@ export default class WoD {
     }
     
     if (flagSound) {      
-      const soundPath = game.settings.get("wheel-of-destiny", "soundPath");
+      const soundFolderPath = game.settings.get("wheel-of-destiny", "soundPath");
       const soundVolume =game.settings.get("wheel-of-destiny", "soundVolume");
+
+      let {files} = await FilePicker.browse("data", soundFolderPath);
+      const soundPath = files[Math.floor(Math.random() * files.length)];
+       
       AudioHelper.play({
         src: soundPath,
         volume: soundVolume,

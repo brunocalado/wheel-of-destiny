@@ -99,13 +99,13 @@ Hooks.once('init', () => {
   
   // call this with: game.settings.get("wheel-of-destiny", "soundPath")
   game.settings.register(moduleName, 'soundPath', {
-    name: 'Sound Path',
-    hint: 'You can set a path to a sound you prefer.',
+    name: 'Sound Folder Path',
+    hint: 'You can set a sound folder. The module will pick one playable sound from it. DO NOT ADD OTHER FILES. Just add the sounds you want to be played.',
     scope: 'world',
     config: true,
-    default: 'modules/wheel-of-destiny/assets/laugh1.ogg',
+    default: 'modules/wheel-of-destiny/assets/sounds',
     type: String,
-    filePicker: 'audio'
+    filePicker: 'folder'
   });  
   
   // call this with: game.settings.get("wheel-of-destiny", "soundVolume")
