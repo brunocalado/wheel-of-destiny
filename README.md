@@ -1,6 +1,10 @@
 # ☯ Wheel of Destiny 
 Select a random token in the scene.
 
+```
+Something bad is about to happen to someone in the room. But, you don't want to be the responsible for it. Let the **Wheel of Destiny** spin. It wasn't your fault, it was the dawn computer.
+```
+
 <p align="center">
   <img width="600" src="docs/docs_demo.webp">
 </p>
@@ -38,4 +42,3 @@ You can see changes at [CHANGELOG](CHANGELOG.md).
 # License
 - Code license at [LICENSE](LICENSE.md).
 - Assets license at [LICENSE](LICENSE_ASSETS.md).
-- Icons: https://game-icons.net/
