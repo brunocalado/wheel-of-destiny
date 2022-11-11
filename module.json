@@ -9,7 +9,7 @@
       "flags": {}
     }
   ],
-  "version": "0.0.9",
+  "version": "0.1.0",
   "compatibility": {
     "minimum": "10",
     "verified": "10"
@@ -39,7 +39,7 @@
   "socket": true,
   
   "url": "https://github.com/brunocaladowheel-of-destiny",
-  "manifest": "https://raw.githubusercontent.com/brunocaladowheel-of-destiny/main/module.json",  
+  "manifest": "https://raw.githubusercontent.com/brunocalado/wheel-of-destiny/main/module.json",  
   "download": "https://codeload.github.com/brunocaladowheel-of-destiny/zip/main"
   
 }
