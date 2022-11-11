@@ -1,9 +1,7 @@
 # ☯ Wheel of Destiny 
 Select a random token in the scene.
 
-```
 Something bad is about to happen to someone in the room. But, you don't want to be the responsible for it. Let the **Wheel of Destiny** spin. It wasn't your fault, it was the dawn computer.
-```
 
 <p align="center">
   <img width="600" src="docs/docs_demo.webp">
