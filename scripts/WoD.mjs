@@ -14,6 +14,7 @@ export default class WoD {
     const flagDialog = game.settings.get("wheel-of-destiny", "hasDialog");
     const flagSound = game.settings.get("wheel-of-destiny", "playSound");
     const flagAnimation = game.settings.get("wheel-of-destiny", "playAnimation");
+    const flagShareMedia = game.settings.get("wheel-of-destiny", "flagShareMedia");
     
     // --------------------------------------------------
     // Error handling
@@ -84,6 +85,14 @@ export default class WoD {
         return;
       }      
       this.sequencerAnimation(selectedToken);
+    }
+
+    if (flagShareMedia) {
+      if (!game.modules.get("share-media")?.active) { 
+        ui.notifications.error("Please, activate Share Media module!");
+        return;
+      }            
+      game.modules.get('share-media').API.shareFullscreenMediaToAll('modules/wheel-of-destiny/assets/counter.webm', '', false, false)
     }
     
   } // END  

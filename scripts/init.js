@@ -83,7 +83,7 @@ Hooks.once('init', () => {
     hint: 'The text you enter in here will show on the top of the dialog message.', //
     scope: 'world',
     config: true,
-    default: 'You has been choosen!',
+    default: 'You has been chosen!',
     type: String
   });
 
@@ -95,6 +95,27 @@ Hooks.once('init', () => {
     config: true,
     type: Boolean,
     default: false
+  });
+
+  // call this with: game.settings.get("wheel-of-destiny", "flagShareMedia")
+  game.settings.register(moduleName, "flagShareMedia", {
+    name: 'Share Media - Hide Interface', // 
+    hint: 'Check this to cover FVTT interface with an image/video. YOU MUST HAVE SHARE MEDIA ENABLED TO USE THIS. YOU MUST SET IMMERSIVE MODE IN SHARE MEDIA SETTINGS.', // 
+    scope: 'world',
+    config: true,
+    type: Boolean,
+    default: false
+  });
+
+  // call this with: game.settings.get("wheel-of-destiny", "flagShareMediaFile")
+  game.settings.register(moduleName, "flagShareMediaFile", {
+    name: 'Share Media - File', // 
+    hint: 'Check this to cover FVTT interface with an image/video. YOU MUST HAVE SHARE MEDIA ENABLED TO USE THIS. YOU MUST SET IMMERSIVE MODE IN SHARE MEDIA SETTINGS.', // 
+    scope: 'world',
+    config: true,
+    type: String,
+    default: 'modules/wheel-of-destiny/assets/counter.webm',
+    filePicker: 'imagevideo'
   });
   
   // call this with: game.settings.get("wheel-of-destiny", "playSound")
@@ -138,13 +159,14 @@ Hooks.once('init', () => {
 Hooks.on("getSceneControlButtons", function(controls) {
   let tileControls = controls.find(x => x.name === "token");
   
-  tileControls.tools.push({
-    icon: "fas fa-yin-yang",
-    name: "wheel-of-destiny_token_button",
-    title: "☯ Wheel of Destiny",
-    button: true,
-    onClick: () => window.game.wod.randomToken()
-  });
-
+  if (game.user.isGM) {
+    tileControls.tools.push({
+      icon: "fas fa-yin-yang",
+      name: "wheel-of-destiny_token_button",
+      title: "☯ Wheel of Destiny",
+      button: true,
+      onClick: () => window.game.wod.randomToken()
+    });
+  }
+  
 });
-
