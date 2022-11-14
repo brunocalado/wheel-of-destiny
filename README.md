@@ -36,7 +36,9 @@ You can see changes at [CHANGELOG](CHANGELOG.md).
 
 # Acknowledgements
 - JB2A: https://jb2a.com/
-- Roll of Fate module. RIP
+- Roll of Fate module. R.I.P.
+- Sequencer module.
+- Share Media module.
 
 # License
 - Code license at [LICENSE](LICENSE.md).

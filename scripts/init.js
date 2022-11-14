@@ -53,6 +53,20 @@ Hooks.once('init', () => {
     default: false
   });
 
+  // call this with: game.settings.get("wheel-of-destiny", "imageSource")
+  game.settings.register(moduleName, 'imageSource', {
+    name: 'Image Source', 
+    hint: 'Choose if you want to show the token art or the actor sheet art.',
+    scope: "world",
+    type: String,
+    choices: {
+      'tokenart': 'Token Art',
+      'sheetart': 'Actor Sheet Art'     
+    },
+    default: "tokenart",
+    config: true
+  });
+
   // call this with: game.settings.get("wheel-of-destiny", "autoSelectBehavior")
   game.settings.register(moduleName, 'autoSelectBehavior', {
     name: 'Auto Select Behavior', 
@@ -83,39 +97,8 @@ Hooks.once('init', () => {
     hint: 'The text you enter in here will show on the top of the dialog message.', //
     scope: 'world',
     config: true,
-    default: 'You has been chosen!',
+    default: 'You have been chosen!',
     type: String
-  });
-
-  // call this with: game.settings.get("wheel-of-destiny", "playAnimation")
-  game.settings.register(moduleName, "playAnimation", {
-    name: 'Play Animation', // 
-    hint: 'Check this to play a simple a animation over the token. YOU MUST HAVE SEQUENCER ENABLED TO USE THIS.', // 
-    scope: 'world',
-    config: true,
-    type: Boolean,
-    default: false
-  });
-
-  // call this with: game.settings.get("wheel-of-destiny", "flagShareMedia")
-  game.settings.register(moduleName, "flagShareMedia", {
-    name: 'Share Media - Hide Interface', // 
-    hint: 'Check this to cover FVTT interface with an image/video. YOU MUST HAVE SHARE MEDIA ENABLED TO USE THIS. YOU MUST SET IMMERSIVE MODE IN SHARE MEDIA SETTINGS.', // 
-    scope: 'world',
-    config: true,
-    type: Boolean,
-    default: false
-  });
-
-  // call this with: game.settings.get("wheel-of-destiny", "flagShareMediaFile")
-  game.settings.register(moduleName, "flagShareMediaFile", {
-    name: 'Share Media - File', // 
-    hint: 'Check this to cover FVTT interface with an image/video. YOU MUST HAVE SHARE MEDIA ENABLED TO USE THIS. YOU MUST SET IMMERSIVE MODE IN SHARE MEDIA SETTINGS.', // 
-    scope: 'world',
-    config: true,
-    type: String,
-    default: 'modules/wheel-of-destiny/assets/counter.webm',
-    filePicker: 'imagevideo'
   });
   
   // call this with: game.settings.get("wheel-of-destiny", "playSound")
@@ -152,6 +135,42 @@ Hooks.once('init', () => {
       step: 0.1
     },     
     type: Number
+  });
+
+  // call this with: game.settings.get("wheel-of-destiny", "sequencerAnimation")
+  game.settings.register(moduleName, "sequencerAnimation", {
+    name: 'Sequencer - Play Animation', // 
+    hint: 'Choose a sequencer animation to play over the token. YOU MUST HAVE SEQUENCER ENABLED TO USE THIS.', // 
+    scope: 'world',
+    config: true,
+    type: String,
+    choices: {
+      'none': 'Disabled',
+      'arrows': 'Arrows on Selected Token',     
+      'roulete': 'Roulete'     
+    },    
+    default: 'none'
+  });
+
+  // call this with: game.settings.get("wheel-of-destiny", "flagShareMedia")
+  game.settings.register(moduleName, "flagShareMedia", {
+    name: 'Share Media - Hide Interface', // 
+    hint: 'Check this to cover FVTT interface with an image/video. YOU MUST HAVE SHARE MEDIA ENABLED TO USE THIS. YOU MUST SET IMMERSIVE MODE IN SHARE MEDIA SETTINGS.', // 
+    scope: 'world',
+    config: true,
+    type: Boolean,
+    default: false
+  });
+
+  // call this with: game.settings.get("wheel-of-destiny", "flagShareMediaFile")
+  game.settings.register(moduleName, "flagShareMediaFile", {
+    name: 'Share Media - File', // 
+    hint: 'Check this to cover FVTT interface with an image/video. YOU MUST HAVE SHARE MEDIA ENABLED TO USE THIS. YOU MUST SET IMMERSIVE MODE IN SHARE MEDIA SETTINGS.', // 
+    scope: 'world',
+    config: true,
+    type: String,
+    default: 'modules/wheel-of-destiny/assets/counter.webm',
+    filePicker: 'imagevideo'
   });
 
 }); // END HOOKS

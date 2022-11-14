@@ -13,7 +13,7 @@ export default class WoD {
     const flagChat = true;
     const flagDialog = game.settings.get("wheel-of-destiny", "hasDialog");
     const flagSound = game.settings.get("wheel-of-destiny", "playSound");
-    const flagAnimation = game.settings.get("wheel-of-destiny", "playAnimation");
+    const sequencerAnimation = game.settings.get("wheel-of-destiny", "sequencerAnimation");
     const flagShareMedia = game.settings.get("wheel-of-destiny", "flagShareMedia");
     
     // --------------------------------------------------
@@ -37,8 +37,14 @@ export default class WoD {
     const rand = Math.floor(Math.random() * tokens.length);
     const selectedToken = tokens[rand];
     const tokenName = tokens[rand].document.name;
-    const imagePath = tokens[rand].document.texture.src;
-  
+	
+	let imagePath;
+	if (game.settings.get("wheel-of-destiny", "imageSource")=='tokenart' ) {
+		imagePath = tokens[rand].document.texture.src;
+	} else {
+		imagePath = tokens[rand].document.actor.img;
+	}
+
     let tokensNameList = tokens.map(function(item){
        return `<li>${item.name}</li>`;
     });
@@ -79,12 +85,16 @@ export default class WoD {
       }, true);       
     }
     
-    if (flagAnimation) {
+    if (sequencerAnimation!='none') {
       if (!game.modules.get("sequencer")?.active) { 
         ui.notifications.error("Please, activate Sequencer module!");
         return;
-      }      
-      this.sequencerAnimation(selectedToken);
+      }
+      if (sequencerAnimation=='arrows') {
+        this.sequencerAnimation(selectedToken);
+      } else {
+        this.sequencerAnimationRoulette(tokens, selectedToken);
+      }
     }
 
     if (flagShareMedia) {
@@ -92,7 +102,7 @@ export default class WoD {
         ui.notifications.error("Please, activate Share Media module!");
         return;
       }            
-      game.modules.get('share-media').API.shareFullscreenMediaToAll('modules/wheel-of-destiny/assets/counter.webm', '', false, false)
+      game.modules.get('share-media').API.shareFullscreenMediaToAll(game.settings.get("wheel-of-destiny", "flagShareMediaFile"), '', false, false)
     }
     
   } // END  
@@ -144,7 +154,7 @@ export default class WoD {
 
   //-----------------------------------------------
   // 
-  async sequencerAnimation(selectedToken) {
+  async sequencerAnimation(selectedToken, delay=0) {
     let effectScale = 0.25;
     let tokenSize;
     const animation = "modules/jb2a_patreon/Library/Generic/UI/Indicator01_02_Regular_BlueGreen_400x400.webm";
@@ -157,8 +167,43 @@ export default class WoD {
       .repeats(10)
       .fadeIn(500)
       .fadeOut(500)    
-      .duration(10000)      
+      .duration(10000)
+      .delay(delay)      
     .play();
+  }
+
+  //-----------------------------------------------
+  // 
+  async sequencerAnimationRoulette(selectedTokens, selectedToken) {
+    const animation = "modules/wheel-of-destiny/assets/animation/portal.webm";
+    let effectScale = 0.7;
+    let tokenSize;
+    let delay = 0;
+    
+    const index = selectedTokens.indexOf(selectedToken);
+    selectedTokens.splice(index, 1); // 2nd parameter means remove one item only
+    selectedTokens.push(selectedToken);
+    
+    for (let i=0; i<2; i++) {
+      for(let iteratedToken of selectedTokens) {
+        delay = delay + 1000;
+        tokenSize = (iteratedToken.document.width + iteratedToken.document.height) / 2;
+        new Sequence()
+          .effect()
+            .file(animation)
+            .scale(effectScale * tokenSize)
+            .atLocation(iteratedToken)
+            .belowTokens()
+            .repeats(1)		
+            .delay(delay)
+            .fadeIn(200)
+            .fadeOut(200)
+            .duration(1000)            
+        .play();
+      } // end for 2
+    } // end for 1
+    
+    this.sequencerAnimation(selectedToken,delay+1000);
   }
 
 } // END CLASS
