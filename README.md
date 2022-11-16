@@ -12,8 +12,16 @@ Something bad is about to happen to someone in the room. But, you don't want to 
 - If you don't select any token, the module will read all tokens in the scene. There are some options to modify this behavior.
 - The select token will be display in the chat or a dialog.
 - You can pick a folder with sounds. Then, one random sound will be played when you run the wheel.
-- Sequencer Module: There will be an animation played over the selected token.
+- You can target and pan to the token.
+- Sequencer Module: There will be an roulete animation played over the tokens.
 - Share Media Module: You can trigger a fullscreen image/video to hide the select token.
+
+# How To
+You need to choose a group of options that suit your goal. 
+
+Examples:
+- Just send a chat whisper to GM
+- Roulete and chat whisper to GM
 
 ## Macros and Integration
 You can trigger Wheel of Destiny with the following code. This can be used by macros/modules.

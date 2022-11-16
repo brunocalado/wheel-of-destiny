@@ -53,6 +53,26 @@ Hooks.once('init', () => {
     default: false
   });
 
+  // call this with: game.settings.get("wheel-of-destiny", "targetToken")
+  game.settings.register(moduleName, "targetToken", {
+    name: 'Target the Selected Token', // 
+    hint: 'This will target the selected token.', // 
+    scope: 'world',
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  // call this with: game.settings.get("wheel-of-destiny", "panToToken")
+  game.settings.register(moduleName, "panToToken", {
+    name: 'Pan the Selected Token', // 
+    hint: 'This will pan to the selected token.', // 
+    scope: 'world',
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
   // call this with: game.settings.get("wheel-of-destiny", "imageSource")
   game.settings.register(moduleName, 'imageSource', {
     name: 'Image Source', 
@@ -126,7 +146,7 @@ Hooks.once('init', () => {
   game.settings.register(moduleName, 'soundVolume', {
     name: 'Sound Volume',
     hint: "You can set the volume for the warning sound. Use 0.1 for 10% of the volume. 0.6 for 60% of the volume.",
-    scope: 'world',
+    scope: 'client',
     config: true,
     default: 0.6,
     range: {
@@ -146,10 +166,24 @@ Hooks.once('init', () => {
     type: String,
     choices: {
       'none': 'Disabled',
-      'arrows': 'Arrows on Selected Token',     
       'roulete': 'Roulete'     
     },    
     default: 'none'
+  });
+
+  // call this with: game.settings.get("wheel-of-destiny", "sequencerRouleteDelay")
+  game.settings.register(moduleName, 'sequencerRouleteDelay', {
+    name: 'Sequencer - Roulete Delay',
+    hint: "You can modify the delay of the Roulete animation.",
+    scope: 'world',
+    config: true,
+    default: 200,
+    range: {
+      min: 0,
+      max: 2000,
+      step: 50
+    },     
+    type: Number
   });
 
   // call this with: game.settings.get("wheel-of-destiny", "flagShareMedia")

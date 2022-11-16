@@ -15,6 +15,8 @@ export default class WoD {
     const flagSound = game.settings.get("wheel-of-destiny", "playSound");
     const sequencerAnimation = game.settings.get("wheel-of-destiny", "sequencerAnimation");
     const flagShareMedia = game.settings.get("wheel-of-destiny", "flagShareMedia");
+    const targetToken = game.settings.get("wheel-of-destiny", "targetToken");
+    const panToToken = game.settings.get("wheel-of-destiny", "panToToken");
     
     // --------------------------------------------------
     // Error handling
@@ -37,13 +39,19 @@ export default class WoD {
     const rand = Math.floor(Math.random() * tokens.length);
     const selectedToken = tokens[rand];
     const tokenName = tokens[rand].document.name;
+    
+    // Target Token
+    if (sequencerAnimation=='none' && targetToken) { game.user.updateTokenTargets([selectedToken.id]); } 
+
+    // Pan to Token
+    if (sequencerAnimation=='none' && panToToken) { panAndPingToken(selectedToken); }
 	
-	let imagePath;
-	if (game.settings.get("wheel-of-destiny", "imageSource")=='tokenart' ) {
-		imagePath = tokens[rand].document.texture.src;
-	} else {
-		imagePath = tokens[rand].document.actor.img;
-	}
+    let imagePath;
+    if (game.settings.get("wheel-of-destiny", "imageSource")=='tokenart' ) {
+      imagePath = tokens[rand].document.texture.src;
+    } else {
+      imagePath = tokens[rand].document.actor.img;
+    }
 
     let tokensNameList = tokens.map(function(item){
        return `<li>${item.name}</li>`;
@@ -90,11 +98,7 @@ export default class WoD {
         ui.notifications.error("Please, activate Sequencer module!");
         return;
       }
-      if (sequencerAnimation=='arrows') {
-        this.sequencerAnimation(selectedToken);
-      } else {
-        this.sequencerAnimationRoulette(tokens, selectedToken);
-      }
+      await this.sequencerAnimationRoulette(tokens, selectedToken);
     }
 
     if (flagShareMedia) {
@@ -154,31 +158,13 @@ export default class WoD {
 
   //-----------------------------------------------
   // 
-  async sequencerAnimation(selectedToken, delay=0) {
-    let effectScale = 0.25;
-    let tokenSize;
-    const animation = "modules/jb2a_patreon/Library/Generic/UI/Indicator01_02_Regular_BlueGreen_400x400.webm";
-    tokenSize = (selectedToken.document.width + selectedToken.document.height) /2;
-    new Sequence()
-    .effect()
-      .file(animation)
-      .atLocation(selectedToken)
-      .scale(tokenSize * effectScale)
-      .repeats(10)
-      .fadeIn(500)
-      .fadeOut(500)    
-      .duration(10000)
-      .delay(delay)      
-    .play();
-  }
-
-  //-----------------------------------------------
-  // 
   async sequencerAnimationRoulette(selectedTokens, selectedToken) {
-    const animation = "modules/wheel-of-destiny/assets/animation/portal.webm";
-    let effectScale = 0.7;
+    const animation = "modules/wheel-of-destiny/assets/animation/target.webm";
+    let effectScale = 0.5;
     let tokenSize;
+    const sequencerRouleteDelay = game.settings.get("wheel-of-destiny", "sequencerRouleteDelay");
     let delay = 0;
+    const delayValue = 400 + sequencerRouleteDelay;    
     
     const index = selectedTokens.indexOf(selectedToken);
     selectedTokens.splice(index, 1); // 2nd parameter means remove one item only
@@ -186,9 +172,9 @@ export default class WoD {
     
     for (let i=0; i<2; i++) {
       for(let iteratedToken of selectedTokens) {
-        delay = delay + 1000;
+        delay = delayValue;
         tokenSize = (iteratedToken.document.width + iteratedToken.document.height) / 2;
-        new Sequence()
+        const out = await new Sequence()
           .effect()
             .file(animation)
             .scale(effectScale * tokenSize)
@@ -198,12 +184,26 @@ export default class WoD {
             .delay(delay)
             .fadeIn(200)
             .fadeOut(200)
-            .duration(1000)            
+            .duration(delayValue)            
         .play();
       } // end for 2
     } // end for 1
     
-    this.sequencerAnimation(selectedToken,delay+1000);
+    this.panAndPingToken(selectedToken);
+    game.user.updateTokenTargets([selectedToken.id]);
+  }
+
+  //-----------------------------------------------
+  // Pan and Ping Token
+  panAndPingToken(selectedToken) {
+    const origin = selectedToken.center;
+    const options = {
+      scene: canvas.scene.id,
+      pull: true,
+      style: CONFIG.Canvas.pings.types.PULL
+    };
+    canvas.ping(origin, options);    
   }
 
 } // END CLASS
+

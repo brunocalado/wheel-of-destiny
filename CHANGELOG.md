@@ -1,3 +1,10 @@
+0.1.4
+- roulete improvement
+- target token
+- pan to token
+- ping to token
+- sound volume is client now
+
 0.1.3
 - small fixes
 - token art or actor sheet art settings
