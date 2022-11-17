@@ -1,3 +1,10 @@
+0.1.5
+- selectRandomToken api
+- randomToken([]) api
+- docs - readme
+- roulete and panToToken fixes
+- roulete animation options
+
 0.1.4
 - roulete improvement
 - target token

@@ -170,7 +170,21 @@ Hooks.once('init', () => {
     },    
     default: 'none'
   });
-
+  
+  // call this with: game.settings.get("wheel-of-destiny", "sequencerRouleteAnimation")
+  game.settings.register(moduleName, 'sequencerRouleteAnimation', {
+    name: 'Sequencer - Roulete Animation', 
+    hint: 'You can pick one animation for the Roulete Animation.',
+    scope: "world",
+    type: String,
+    choices: {
+      'modules/wheel-of-destiny/assets/animation/target-red.webm': 'Red',
+      'modules/wheel-of-destiny/assets/animation/target-green.webm': 'Green'     
+    },
+    default: "modules/wheel-of-destiny/assets/animation/target-red.webm",
+    config: true
+  });
+  
   // call this with: game.settings.get("wheel-of-destiny", "sequencerRouleteDelay")
   game.settings.register(moduleName, 'sequencerRouleteDelay', {
     name: 'Sequencer - Roulete Delay',

@@ -25,10 +25,22 @@ Examples:
 
 ## Macros and Integration
 You can trigger Wheel of Destiny with the following code. This can be used by macros/modules.
+
+### This do same as trigger the button or shortcut.
 ```js
   window.game.wod.randomToken();
 ```
 
+### You can pass a custom token list. It'll return the selected token. All WoD features will be triggered.
+```js  
+  const mySelectedToken = window.game.wod.randomToken(customTokenList=[]);
+```
+
+### You can pass a custom token list. It'll return the selected token.
+```js  
+  const mySelectedToken = window.game.wod.selectRandomToken(tokens=[]);
+```
+  
 ## Keybindings
 You can use keybindings to trigger too. Use **F**. You can change it on **Controls**.
 

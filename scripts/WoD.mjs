@@ -5,11 +5,12 @@ export default class WoD {
     this.socket.register("showDialogForEveryone", this.showDialogForEveryone);    // Dialog
   }
   
-  async randomToken() {
+  async randomToken(customTokenList=[]) {
     let data = {};
     let tokens = canvas.tokens.controlled; // tokens
     const allTokens = canvas.tokens.placeables;
-    const autoSelectBehavior = game.settings.get("wheel-of-destiny", "autoSelectBehavior")
+
+    const autoSelectBehavior = game.settings.get("wheel-of-destiny", "autoSelectBehavior")    
     const flagChat = true;
     const flagDialog = game.settings.get("wheel-of-destiny", "hasDialog");
     const flagSound = game.settings.get("wheel-of-destiny", "playSound");
@@ -20,25 +21,31 @@ export default class WoD {
     
     // --------------------------------------------------
     // Error handling
-    if (tokens.length<1) {      
-      tokens = allTokens;
-      if (tokens.length<1) {
-       ui.notifications.notify( '☯ ' + 'There is no tokens available on this scene.', 'info', {permanent: false});
-       return;       
-      } else { // Auto Select
-        if (autoSelectBehavior=='pcs') {
-          tokens = tokens.filter(e => e.document.hasPlayerOwner===true);  
-          if (tokens.length<1) {
-           ui.notifications.notify( '☯ ' + 'There is no PC tokens available on this scene.', 'info', {permanent: false});
-           return;       
-          }          
-        }        
+    
+    if (customTokenList.length>0) {     
+      tokens = customTokenList;
+    } else {      
+      if (tokens.length<1) {      
+        tokens = allTokens;
+        if (tokens.length<1) {
+         ui.notifications.notify( '☯ ' + 'There is no tokens available on this scene.', 'info', {permanent: false});
+         return;       
+        } else { // Auto Select
+          if (autoSelectBehavior=='pcs') {
+            tokens = tokens.filter(e => e.document.hasPlayerOwner===true);  
+            if (tokens.length<1) {
+             ui.notifications.notify( '☯ ' + 'There is no PC tokens available on this scene.', 'info', {permanent: false});
+             return;       
+            }          
+          }        
+        }
       }
-    }
+    } // end customTokenList
 
-    const rand = Math.floor(Math.random() * tokens.length);
-    const selectedToken = tokens[rand];
-    const tokenName = tokens[rand].document.name;
+    // --------------------------------------------------
+    // Select a Random Token
+    const selectedToken = this.selectRandomToken(tokens);
+    const tokenName = selectedToken.document.name;
     
     // Target Token
     if (sequencerAnimation=='none' && targetToken) { game.user.updateTokenTargets([selectedToken.id]); } 
@@ -48,9 +55,9 @@ export default class WoD {
 	
     let imagePath;
     if (game.settings.get("wheel-of-destiny", "imageSource")=='tokenart' ) {
-      imagePath = tokens[rand].document.texture.src;
+      imagePath = selectedToken.document.texture.src;
     } else {
-      imagePath = tokens[rand].document.actor.img;
+      imagePath = selectedToken.document.actor.img;
     }
 
     let tokensNameList = tokens.map(function(item){
@@ -159,7 +166,7 @@ export default class WoD {
   //-----------------------------------------------
   // 
   async sequencerAnimationRoulette(selectedTokens, selectedToken) {
-    const animation = "modules/wheel-of-destiny/assets/animation/target.webm";
+    const animation = game.settings.get("wheel-of-destiny", "sequencerRouleteAnimation");
     let effectScale = 0.5;
     let tokenSize;
     const sequencerRouleteDelay = game.settings.get("wheel-of-destiny", "sequencerRouleteDelay");
@@ -169,6 +176,9 @@ export default class WoD {
     const index = selectedTokens.indexOf(selectedToken);
     selectedTokens.splice(index, 1); // 2nd parameter means remove one item only
     selectedTokens.push(selectedToken);
+    
+    const targetToken = game.settings.get("wheel-of-destiny", "targetToken");
+    const panToToken = game.settings.get("wheel-of-destiny", "panToToken");
     
     for (let i=0; i<2; i++) {
       for(let iteratedToken of selectedTokens) {
@@ -189,8 +199,8 @@ export default class WoD {
       } // end for 2
     } // end for 1
     
-    this.panAndPingToken(selectedToken);
-    game.user.updateTokenTargets([selectedToken.id]);
+    if (panToToken) { this.panAndPingToken(selectedToken); }
+    if (targetToken) { game.user.updateTokenTargets([selectedToken.id]); }
   }
 
   //-----------------------------------------------
@@ -205,5 +215,12 @@ export default class WoD {
     canvas.ping(origin, options);    
   }
 
+  // --------------------------------------------------
+  // Select a Random Token
+  selectRandomToken(tokens) {
+    const rand = Math.floor(Math.random() * tokens.length);
+    return tokens[rand];    
+  }
+  
 } // END CLASS
 
