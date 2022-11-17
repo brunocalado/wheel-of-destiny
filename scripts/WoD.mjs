@@ -11,13 +11,13 @@ export default class WoD {
     const allTokens = canvas.tokens.placeables;
 
     const autoSelectBehavior = game.settings.get("wheel-of-destiny", "autoSelectBehavior")    
-    const flagChat = true;
     const flagDialog = game.settings.get("wheel-of-destiny", "hasDialog");
     const flagSound = game.settings.get("wheel-of-destiny", "playSound");
     const sequencerAnimation = game.settings.get("wheel-of-destiny", "sequencerAnimation");
     const flagShareMedia = game.settings.get("wheel-of-destiny", "flagShareMedia");
     const targetToken = game.settings.get("wheel-of-destiny", "targetToken");
     const panToToken = game.settings.get("wheel-of-destiny", "panToToken");
+    const privacy = game.settings.get("wheel-of-destiny", "chatMessagePrivacy");
     
     // --------------------------------------------------
     // Error handling
@@ -51,7 +51,7 @@ export default class WoD {
     if (sequencerAnimation=='none' && targetToken) { game.user.updateTokenTargets([selectedToken.id]); } 
 
     // Pan to Token
-    if (sequencerAnimation=='none' && panToToken) { panAndPingToken(selectedToken); }
+    if (sequencerAnimation=='none' && panToToken) { this.panAndPingToken(selectedToken); }
 	
     let imagePath;
     if (game.settings.get("wheel-of-destiny", "imageSource")=='tokenart' ) {
@@ -59,25 +59,10 @@ export default class WoD {
     } else {
       imagePath = selectedToken.document.actor.img;
     }
-
-    let tokensNameList = tokens.map(function(item){
-       return `<li>${item.name}</li>`;
-    });
-    tokensNameList = tokensNameList.join("");
     
-    if (flagChat) {
-      const topMessage = game.settings.get("wheel-of-destiny", "topMessage");
-      const displaySelected = game.settings.get("wheel-of-destiny", "displaySelected");
-      const templateData = { imagePath: imagePath, tokenName: tokenName, topMessage: topMessage, tokensNameList: tokensNameList, displaySelected: displaySelected };
-      const myContent = await renderTemplate("modules/wheel-of-destiny/templates/chat.html", templateData);    
-      const privacy = game.settings.get("wheel-of-destiny", "chatMessagePrivacy");
-      if (privacy=='gmonly') {
-        ChatMessage.create({
-         content: myContent, whisper: [game.user.id]
-        });
-      } else {
-        ChatMessage.create({ content: myContent });        
-      }
+    // Chat
+    if ( sequencerAnimation=='none' && privacy!='none' ) {
+      this.createChatMessage(selectedToken, tokens, imagePath);
     }
 
     if (flagDialog) {
@@ -106,6 +91,7 @@ export default class WoD {
         return;
       }
       await this.sequencerAnimationRoulette(tokens, selectedToken);
+      if ( privacy!='none' ) { this.createChatMessage(selectedToken, tokens, imagePath); }
     }
 
     if (flagShareMedia) {
@@ -221,6 +207,32 @@ export default class WoD {
     const rand = Math.floor(Math.random() * tokens.length);
     return tokens[rand];    
   }
+
+  // --------------------------------------------------
+  // Chat Message
+  async createChatMessage(selectedToken, tokens, imagePath) {
+    const tokenName = selectedToken.document.name;
+    const topMessage = game.settings.get("wheel-of-destiny", "topMessage");
+    const displaySelected = game.settings.get("wheel-of-destiny", "displaySelected");
+    
+    let tokensNameList = tokens.map(function(item){
+       return `<li>${item.name}</li>`;
+    });
+    tokensNameList = tokensNameList.join("");
+    
+    const templateData = { imagePath: imagePath, tokenName: tokenName, topMessage: topMessage, tokensNameList: tokensNameList, displaySelected: displaySelected };
+    const myContent = await renderTemplate("modules/wheel-of-destiny/templates/chat.html", templateData);    
+    const privacy = game.settings.get("wheel-of-destiny", "chatMessagePrivacy");
+    
+    if (privacy=='gmonly') {
+      ChatMessage.create({
+       content: myContent, whisper: [game.user.id]
+      });
+    } else {
+      ChatMessage.create({ content: myContent });        
+    }    
+  }
+
   
 } // END CLASS
 

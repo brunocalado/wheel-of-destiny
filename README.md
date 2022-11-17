@@ -59,6 +59,7 @@ You can see changes at [CHANGELOG](CHANGELOG.md).
 - Roll of Fate module. R.I.P.
 - Sequencer module.
 - Share Media module.
+- @PepijnMC 
 
 # License
 - Code license at [LICENSE](LICENSE.md).

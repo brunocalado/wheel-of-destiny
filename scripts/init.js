@@ -36,10 +36,11 @@ Hooks.once('init', () => {
     scope: "world",
     type: String,
     choices: {
+      'none': 'Disable Chat Message',
       'gmonly': 'Whisper to GM',
       'everyone': 'Show to Everyone'     
     },
-    default: "everyone",
+    default: "gmonly",
     config: true
   });
 

@@ -1,3 +1,8 @@
+0.1.6
+- fix pan error, PepijnMC
+- chat wait for roulete
+- you can disable chat
+
 0.1.5
 - selectRandomToken api
 - randomToken([]) api
