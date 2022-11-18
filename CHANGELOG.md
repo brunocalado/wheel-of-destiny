@@ -1,3 +1,9 @@
+0.1.7
+- roulete animation improvement
+- more options for auto select 
+- fix selectRandomToken
+- dialog for custom auto select
+
 0.1.6
 - fix pan error, PepijnMC
 - chat wait for roulete

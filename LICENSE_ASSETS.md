@@ -6,3 +6,5 @@ none
 
 # Blender
 target -> CC0
+
+# Images

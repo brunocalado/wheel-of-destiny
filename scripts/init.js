@@ -26,6 +26,19 @@ Hooks.once('init', () => {
     precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
   });  
 
+  game.keybindings.register(moduleName, "wheel-of-destiny_keybinding_custom", {
+    name: '☯ Custom Wheel of Destiny',
+    hint: 'This will trigger a dialog with options for the Wheel of Destiny.',
+    editable: [{ key: "KeyF", modifiers: ["Shift"]}],
+    onDown: () => {
+      window.game.wod.customAutoSelectDialog();  
+    },
+    onUp: () => {},
+    restricted: true,  // Restrict this Keybinding to gamemaster only?
+    reservedModifiers: [],
+    precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
+  });
+
   // --------------------------------------------------
   // SETTINGS
 
@@ -66,8 +79,8 @@ Hooks.once('init', () => {
 
   // call this with: game.settings.get("wheel-of-destiny", "panToToken")
   game.settings.register(moduleName, "panToToken", {
-    name: 'Pan the Selected Token', // 
-    hint: 'This will pan to the selected token.', // 
+    name: 'Ping and Pan the Selected Token', // 
+    hint: 'This will ping and pan the selected token.', // 
     scope: 'world',
     config: true,
     type: Boolean,
@@ -96,7 +109,9 @@ Hooks.once('init', () => {
     type: String,
     choices: {
       'all': 'Select All Tokens in the Scene',
-      'pcs': 'Select Only PCs'     
+      'pcs': 'Select Only PCs',     
+      'friendly': 'Only Friendly Tokens',     
+      'hostile': 'Only Hostile Tokens'           
     },
     default: "all",
     config: true
@@ -178,9 +193,13 @@ Hooks.once('init', () => {
     hint: 'You can pick one animation for the Roulete Animation.',
     scope: "world",
     type: String,
-    choices: {
-      'modules/wheel-of-destiny/assets/animation/target-red.webm': 'Red',
-      'modules/wheel-of-destiny/assets/animation/target-green.webm': 'Green'     
+    choices: {      
+      'modules/wheel-of-destiny/assets/animation/target-green.webm': 'Round - Green',     
+      'modules/wheel-of-destiny/assets/animation/target-pink.webm': 'Round - Pink',
+      'modules/wheel-of-destiny/assets/animation/target-red.webm': 'Round - Red',
+      'modules/wheel-of-destiny/assets/animation/target-triangle-green.webm': 'Triangle - Green',
+      'modules/wheel-of-destiny/assets/animation/target-triangle-pink.webm': 'Triangle - Pink',
+      'modules/wheel-of-destiny/assets/animation/target-triangle-red.webm': 'Triangle - Red'
     },
     default: "modules/wheel-of-destiny/assets/animation/target-red.webm",
     config: true

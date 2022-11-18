@@ -5,12 +5,12 @@ export default class WoD {
     this.socket.register("showDialogForEveryone", this.showDialogForEveryone);    // Dialog
   }
   
-  async randomToken(customTokenList=[]) {
+  async randomToken(customTokenList=[], customAutoSelect=null) {
     let data = {};
     let tokens = canvas.tokens.controlled; // tokens
     const allTokens = canvas.tokens.placeables;
 
-    const autoSelectBehavior = game.settings.get("wheel-of-destiny", "autoSelectBehavior")    
+    let autoSelectBehavior = game.settings.get("wheel-of-destiny", "autoSelectBehavior")    
     const flagDialog = game.settings.get("wheel-of-destiny", "hasDialog");
     const flagSound = game.settings.get("wheel-of-destiny", "playSound");
     const sequencerAnimation = game.settings.get("wheel-of-destiny", "sequencerAnimation");
@@ -25,20 +25,30 @@ export default class WoD {
     if (customTokenList.length>0) {     
       tokens = customTokenList;
     } else {      
-      if (tokens.length<1) {      
+      if (tokens.length<1) { // Auto Select All
         tokens = allTokens;
         if (tokens.length<1) {
          ui.notifications.notify( '☯ ' + 'There is no tokens available on this scene.', 'info', {permanent: false});
          return;       
         } else { // Auto Select
-          if (autoSelectBehavior=='pcs') {
-            tokens = tokens.filter(e => e.document.hasPlayerOwner===true);  
-            if (tokens.length<1) {
-             ui.notifications.notify( '☯ ' + 'There is no PC tokens available on this scene.', 'info', {permanent: false});
-             return;       
-            }          
-          }        
-        }
+          if (customAutoSelect!=null) {autoSelectBehavior=customAutoSelect;}
+          switch(autoSelectBehavior) {
+            case 'pcs':
+              tokens = tokens.filter(e => e.document.hasPlayerOwner===true);  
+              break;
+            case 'friendly':
+              tokens = tokens.filter(e => e.document.disposition===1);  
+              break;
+            case 'hostile':
+              tokens = tokens.filter(e => e.document.disposition===-1);  
+              break;                 
+          }
+   
+          if (tokens.length<1) {
+           ui.notifications.notify( '☯ ' + 'There is no PC tokens available on this scene.', 'info', {permanent: false});
+           return;       
+          }                    
+        } // END Auto Select
       }
     } // end customTokenList
 
@@ -101,7 +111,7 @@ export default class WoD {
       }            
       game.modules.get('share-media').API.shareFullscreenMediaToAll(game.settings.get("wheel-of-destiny", "flagShareMediaFile"), '', false, false)
     }
-    
+    return selectedToken;
   } // END  
 
   //-----------------------------------------------
@@ -175,7 +185,7 @@ export default class WoD {
             .file(animation)
             .scale(effectScale * tokenSize)
             .atLocation(iteratedToken)
-            .belowTokens()
+            //.belowTokens()
             .repeats(1)		
             .delay(delay)
             .fadeIn(200)
@@ -233,6 +243,30 @@ export default class WoD {
     }    
   }
 
+  // --------------------------------------------------
+  // 
+  async customAutoSelectDialog() {  
+    const templateData = {};
+    const myContent = await renderTemplate("modules/wheel-of-destiny/templates/dialog_autoselect.html", templateData);
+    
+    new Dialog({
+      title: `Wheel of Destiny`,
+      content: myContent,
+      buttons: {
+        ok: {
+          label: "Choose",
+          callback: async (html) => {
+            const customAutoSelect = html.find('#custom_autoselect')[0].value;
+            this.randomToken([], customAutoSelect);      
+          },
+        },
+        cancel: {
+          label: "Cancel",
+        }
+      }
+    }).render(true);  
+
+  }
   
 } // END CLASS
 
