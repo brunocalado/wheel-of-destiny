@@ -1,3 +1,6 @@
+0.1.8
+- v11
+
 0.1.7
 - roulete animation improvement
 - more options for auto select 
