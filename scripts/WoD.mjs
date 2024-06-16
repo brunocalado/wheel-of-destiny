@@ -87,7 +87,7 @@ export default class WoD {
       let {files} = await FilePicker.browse("data", soundFolderPath);
       const soundPath = files[Math.floor(Math.random() * files.length)];
        
-      AudioHelper.play({
+      foundry.audio.AudioHelper.play({
         src: soundPath,
         volume: soundVolume,
         autoplay: true,
