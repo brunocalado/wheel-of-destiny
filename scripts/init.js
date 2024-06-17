@@ -9,7 +9,7 @@ Hooks.once('init', () => {
   
   // --------------------------------------------------
   // Functions
-  const debouncedReload = debounce(() => location.reload(), 1000); // RELOAD AFTER CHANGE
+  //const debouncedReload = debounce(() => location.reload(), 1000); // RELOAD AFTER CHANGE
 
   // --------------------------------------------------
   // KEYBINDINGS
