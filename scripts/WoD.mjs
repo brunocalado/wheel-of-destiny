@@ -27,7 +27,7 @@ export default class WoD {
       if (tokens.length < 1) { // Auto Select All
         tokens = allTokens;
         if (tokens.length < 1) {
-         ui.notifications.notify( '☯ ' + 'There is no tokens available on this scene.', 'info', {permanent: false});
+         ui.notifications.notify( '☯ ' + 'There are no tokens available in this scene.', 'info', {permanent: false});
          return;
         } else { // Auto Select
           if (customAutoSelect != null) { autoSelectBehavior = customAutoSelect; }
@@ -44,7 +44,7 @@ export default class WoD {
           }
 
           if (tokens.length < 1) {
-           ui.notifications.notify( '☯ ' + 'There is no PC tokens available on this scene.', 'info', {permanent: false});
+           ui.notifications.notify( '☯ ' + 'There are no PC tokens available in this scene.', 'info', {permanent: false});
            return;
           }
         } // END Auto Select
