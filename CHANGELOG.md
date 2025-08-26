@@ -1,3 +1,6 @@
+0.3.0
+- v13
+
 0.2.0
 - v12
 - small fix
@@ -7,7 +10,7 @@
 
 0.1.7
 - roulete animation improvement
-- more options for auto select 
+- more options for auto select
 - fix selectRandomToken
 - dialog for custom auto select
 
