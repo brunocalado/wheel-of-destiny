@@ -1,37 +1,7 @@
-<style>   
-  .container {
-    position: relative;
-    text-align: center;
-    color: white;
-  }
-  
-  /* Centered text */
-  .messageOnTop {
-    position: absolute;
-    top: 0%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    color: black;
-    width: 100%;
-  }
-
-  /* Centered text */
-  .messageOnBottom {
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    color: black;
-    width: 100%;
-  }  
-</style>   
-
-<body>    
+<body>
   <div class="container">
     <div class="messageOnTop">{{topMessage}}</div>
-    <img src="{{imagePath}}" alt="{{tokenName}}" style="width:100%;">    
+    <img src="{{imagePath}}" alt="{{tokenName}}" style="width:100%;">
     <div class="messageOnBottom">{{tokenName}}</div>
-  </div>  
+  </div>
 </body>

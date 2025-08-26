@@ -1,0 +1,73 @@
+.titulo {
+  background-color: black;
+  height: 26px;
+  color: beige;
+  font-size: 15px;
+  font-weight: 400;
+  text-align: center;
+  padding-top: 5px;
+}
+
+.boxcheck {
+  text-align: center;
+  justify-content: center;
+  margin-left: 5px;
+  font-size: 15px;
+  padding: 10px;
+}
+
+.boxcheckpai {
+  background-color: rgba(107, 107, 107, 0.166);
+  height: auto;
+  margin-bottom: 10px;
+}
+
+.containerform {
+  display: flex;
+}
+
+.containerduo {
+  height: 50%;
+  display: inline-block;
+}
+
+.container {
+  position: relative;
+  text-align: center;
+  color: white;
+}
+
+/* Centered text */
+.messageOnTop {
+  position: absolute;
+  top: 0%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  color: black;
+  width: 100%;
+}
+
+/* Centered text */
+.messageOnBottom {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  color: black;
+  width: 100%;
+}
+
+.wod-chat-container {
+  font-size: 1.5em;
+  margin: 0.5em 0;
+}
+.wod-chat-image {
+  max-width: 6em;
+  display: block;
+  margin: 0 auto;
+}
+.wod-chat-token-name {
+  text-align: center;
+}
