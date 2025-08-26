@@ -88,3 +88,7 @@ You can see changes at [CHANGELOG](CHANGELOG.md).
 ## Mestre Digital
 
 About this module creator: https://sites.google.com/view/mestredigitalmodules
+
+## Contributors
+
+- v13 update: [Luber](https://github.com/luizrcb)
