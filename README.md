@@ -91,4 +91,4 @@ About this module creator: https://sites.google.com/view/mestredigitalmodules
 
 ## Contributors
 
-- v13 update: [Luber](https://github.com/luizrcb)
+- v13/v14 update: [Luber](https://github.com/luizrcb)
