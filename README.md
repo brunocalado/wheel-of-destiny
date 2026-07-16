@@ -59,7 +59,7 @@ Two settings sit right in the main module tab, because they're the ones you'll a
 Everything else lives behind three tidy buttons:
 
 - 🎵 **Audio & Sound** — turn sound on, choose your sound folder, pick which audio channel it plays on (so players control the volume in their own Foundry mixer), and hit **Preview Sound** to try a folder before you commit to it.
-- ✨ **Animation & Visual** — enable the roulette animation, tune its speed, ping and pan to the winner, show the full list of candidates in chat, and choose whether to display the **token art** or the **actor sheet art**.
+- ✨ **Animation & Visual** — enable the roulette animation, tune its speed (**Animation Delay** per step) and set a **Max Total Duration** so the animation never drags on too long regardless of how many tokens are in the draw (if the per-step delay would exceed the total cap, it is reduced automatically), ping and pan to the winner, show the full list of candidates in chat, and choose whether to display the **token art** or the **actor sheet art**.
 - 💬 **Dialogs & Chat** — turn the fullscreen reveal on or off, write your own dramatic line ("You have been chosen!"), and decide who sees the chat message: nobody, the GM only, or the whole table.
 
 ## 🧙 Macros & API

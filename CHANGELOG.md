@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.4.1
+
+- Added `rouletteTotalDuration` setting (default: 2000ms, range: 500–10000ms) to cap the total time of the Native Glow roulette animation. If the number of tokens would cause the animation to exceed this limit, the per-step delay is automatically recalculated so the full animation stays within the configured duration.
+
 ## 0.4.0
 
 - Removed socketlib dependency; real-time communication now uses Foundry VTT's native socket API (`game.socket.emit` / `game.socket.on`)

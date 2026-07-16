@@ -210,13 +210,20 @@ export default class WoD {
   //-----------------------------------------------
   // Native Roulette Animation
   async playNativeRoulette(tokens, selectedToken) {
-    const delay = 400 + game.settings.get(MODULE_ID, "rouletteDelay");
+    const rawDelay      = 400 + game.settings.get(MODULE_ID, "rouletteDelay");
+    const totalDuration = game.settings.get(MODULE_ID, "rouletteTotalDuration");
 
     // Ensures the drawn token is the last in the list (same as Sequencer)
     const list = [...tokens];
     const idx = list.indexOf(selectedToken);
     list.splice(idx, 1);
     list.push(selectedToken);
+
+    // Cap per-step delay so the full animation never exceeds totalDuration
+    const totalSteps = list.length * 2; // 2 passes over the token list
+    const maxDelay   = Math.floor(totalDuration / totalSteps);
+    const delay      = Math.min(rawDelay, maxDelay);
+
 
     const targetToken = game.settings.get(MODULE_ID, "targetToken");
     const panToToken   = game.settings.get(MODULE_ID, "panToToken");

@@ -153,7 +153,7 @@ class AudioSettingsForm extends WodSettingsForm {
  */
 class AnimationSettingsForm extends WodSettingsForm {
 
-  static SETTING_KEYS = ["animationMode", "rouletteDelay", "panToToken", "displaySelected", "imageSource"];
+  static SETTING_KEYS = ["animationMode", "rouletteDelay", "rouletteTotalDuration", "panToToken", "displaySelected", "imageSource"];
 
   static DEFAULT_OPTIONS = {
     id: "wod-settings-animation",
@@ -322,7 +322,7 @@ export function registerSettings() {
   // call this with: game.settings.get(MODULE_ID, "rouletteDelay")
   game.settings.register(MODULE_ID, 'rouletteDelay', {
     name: 'Roulette - Animation Delay',
-    hint: "You can modify the delay of the Roulete animation.",
+    hint: "Delay per token step in the roulette animation. If the total duration would exceed the max total duration, this value is recalculated automatically.",
     scope: 'world',
     config: false,
     default: 200,
@@ -330,6 +330,21 @@ export function registerSettings() {
       min: 0,
       max: 2000,
       step: 50
+    },
+    type: Number
+  });
+
+  // call this with: game.settings.get(MODULE_ID, "rouletteTotalDuration")
+  game.settings.register(MODULE_ID, 'rouletteTotalDuration', {
+    name: 'Roulette - Max Total Duration',
+    hint: "Maximum total time (ms) for the roulette animation. If the number of tokens would cause the animation to exceed this limit, the per-step delay is reduced automatically.",
+    scope: 'world',
+    config: false,
+    default: 2000,
+    range: {
+      min: 500,
+      max: 10000,
+      step: 500
     },
     type: Number
   });

@@ -24,6 +24,18 @@
   </div>
 
   <div class="form-group">
+    <label>{{settings.rouletteTotalDuration.name}}</label>
+    <div class="form-fields">
+      <range-picker name="rouletteTotalDuration" value="{{settings.rouletteTotalDuration.value}}"
+                    min="{{settings.rouletteTotalDuration.range.min}}"
+                    max="{{settings.rouletteTotalDuration.range.max}}"
+                    step="{{settings.rouletteTotalDuration.range.step}}"></range-picker>
+    </div>
+    <p class="hint">{{settings.rouletteTotalDuration.hint}}</p>
+  </div>
+
+
+  <div class="form-group">
     <label>{{settings.panToToken.name}}</label>
     <div class="form-fields">
       <input type="checkbox" name="panToToken" data-dtype="Boolean" {{checked settings.panToToken.value}}>
