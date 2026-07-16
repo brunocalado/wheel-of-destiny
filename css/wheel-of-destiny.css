@@ -85,10 +85,10 @@
 }
 
 /* -------------------------------------------------------
- * Native Roulette Glow — canvas overlay, efêmero
- * @keyframes e img.wod-glow-token ficam no root porque
- * os elementos são appendados no parentElement do canvas,
- * fora do escopo .wheel-of-destiny.
+ * Native Roulette Glow — canvas overlay, ephemeral
+ * @keyframes and img.wod-glow-token stay at the root because
+ * the elements are appended to the canvas' parentElement,
+ * outside the .wheel-of-destiny scope.
  * ------------------------------------------------------- */
 
 @keyframes wodGlowPulse {
@@ -109,7 +109,7 @@ img.wod-glow-token {
   pointer-events: none;
   box-sizing: border-box;
   z-index: 200;
-  /* dourado — token passando */
+  /* golden — token passing */
   --wod-r: 255;
   --wod-g: 200;
   --wod-b: 50;
@@ -119,7 +119,7 @@ img.wod-glow-token {
   transform: translate(-50%, -50%);
 }
 
-/* Token sorteado: glow mais intenso e mais rápido */
+/* Selected token: more intense and faster glow */
 img.wod-glow-token.wod-glow-final {
   --wod-r: 255;
   --wod-g: 240;

@@ -168,7 +168,7 @@ export default class WoD {
   async playNativeRoulette(tokens, selectedToken) {
     const delay = 400 + game.settings.get(MODULE_ID, "rouletteDelay");
 
-    // Garante que o token sorteado é o último da lista (igual ao Sequencer)
+    // Ensures the drawn token is the last in the list (same as Sequencer)
     const list = [...tokens];
     const idx = list.indexOf(selectedToken);
     list.splice(idx, 1);
@@ -177,7 +177,7 @@ export default class WoD {
     const targetToken = game.settings.get(MODULE_ID, "targetToken");
     const panToToken   = game.settings.get(MODULE_ID, "panToToken");
 
-    // Ticker PIXI: reposiciona todos os overlays a cada frame para acompanhar o pan
+    // PIXI Ticker: repositions all overlays every frame to track the pan
     const positionTicker = () => {
       document.querySelectorAll('img.wod-glow-token[data-token-id]').forEach(img => {
         const tokenId = img.dataset.tokenId;
@@ -197,27 +197,27 @@ export default class WoD {
     canvas.app.ticker.add(positionTicker);
 
     try {
-      // 2 voltas nos tokens (mesmo comportamento do Sequencer original)
+      // 2 loops over the tokens (same behavior as the original Sequencer)
       for (let pass = 0; pass < 2; pass++) {
         for (const token of list) {
           const isFinalMoment = (pass === 1 && token === selectedToken);
           this._showTokenGlow(token, isFinalMoment);
           await this._sleep(delay);
-          // Apaga imediatamente — exceto o sorteado no momento final
+          // Clears immediately — except the one drawn at the final moment
           if (!isFinalMoment) {
             this._hideTokenGlow(token.id);
           }
         }
       }
 
-      // Token sorteado ainda brilhando: pan, target e espera antes de apagar
+      // Selected token still glowing: pan, target, and wait before clearing
       if (panToToken)  { this.panAndPingToken(selectedToken); }
       if (targetToken) { selectedToken.setTarget(true, { releaseOthers: true }); }
 
       await this._sleep(2000);
 
     } finally {
-      // Para o ticker e limpa todos os glows
+      // Stops the ticker and clears all glows
       canvas.app.ticker.remove(positionTicker);
       this._clearAllGlows();
     }
@@ -225,7 +225,7 @@ export default class WoD {
 
   // --- Helpers: glow DOM overlay ---
 
-  // Converte coordenadas de mundo PIXI para pixels de tela
+  // Converts PIXI world coordinates to screen pixels
   _worldToScreen(worldPos) {
     const t = canvas.stage.worldTransform;
     return {
@@ -238,13 +238,13 @@ export default class WoD {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  // Cria ou atualiza a img de glow sobre o token
+  // Creates or updates the glow img over the token
   _showTokenGlow(token, isFinal = false) {
     let img = document.getElementById(`wod-glow-${token.id}`);
     if (!img) {
       img = document.createElement('img');
       img.id = `wod-glow-${token.id}`;
-      img.dataset.tokenId = token.id; // necessário para o ticker reposicionar
+      img.dataset.tokenId = token.id; // needed for the ticker to reposition
       img.classList.add('wod-glow-token');
       img.src = token.document.texture.src;
       img.style.pointerEvents = 'none';
@@ -253,10 +253,10 @@ export default class WoD {
       parent.appendChild(img);
     }
 
-    // Classe final: glow mais intenso para o sorteado
+    // Final class: more intense glow for the selected token
     img.classList.toggle('wod-glow-final', isFinal);
 
-    // Dimensões respeitando tamanho do token e zoom atual
+    // Dimensions respecting token size and current zoom
     const scaleX = Math.abs(token.document.texture?.scaleX ?? 1);
     const scaleY = Math.abs(token.document.texture?.scaleY ?? 1);
     const w = token.document.width  * canvas.grid.size * canvas.stage.scale.x * scaleX;
@@ -270,12 +270,12 @@ export default class WoD {
     img.style.display = '';
   }
 
-  // Remove o glow de um token específico
+  // Removes the glow from a specific token
   _hideTokenGlow(tokenId) {
     document.getElementById(`wod-glow-${tokenId}`)?.remove();
   }
 
-  // Remove todos os glows (limpeza de emergência)
+  // Removes all glows (emergency cleanup)
   _clearAllGlows() {
     document.querySelectorAll('img.wod-glow-token').forEach(el => el.remove());
   }
