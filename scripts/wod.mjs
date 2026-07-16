@@ -177,6 +177,25 @@ export default class WoD {
     const targetToken = game.settings.get(MODULE_ID, "targetToken");
     const panToToken   = game.settings.get(MODULE_ID, "panToToken");
 
+    // Ticker PIXI: reposiciona todos os overlays a cada frame para acompanhar o pan
+    const positionTicker = () => {
+      document.querySelectorAll('img.wod-glow-token[data-token-id]').forEach(img => {
+        const tokenId = img.dataset.tokenId;
+        const token = canvas.tokens.get(tokenId);
+        if (!token) return;
+        const scaleX = Math.abs(token.document.texture?.scaleX ?? 1);
+        const scaleY = Math.abs(token.document.texture?.scaleY ?? 1);
+        const w = token.document.width  * canvas.grid.size * canvas.stage.scale.x * scaleX;
+        const h = token.document.height * canvas.grid.size * canvas.stage.scale.y * scaleY;
+        const pos = this._worldToScreen(token.center);
+        img.style.width  = `${w}px`;
+        img.style.height = `${h}px`;
+        img.style.left   = `${pos.x}px`;
+        img.style.top    = `${pos.y}px`;
+      });
+    };
+    canvas.app.ticker.add(positionTicker);
+
     try {
       // 2 voltas nos tokens (mesmo comportamento do Sequencer original)
       for (let pass = 0; pass < 2; pass++) {
@@ -198,7 +217,8 @@ export default class WoD {
       await this._sleep(2000);
 
     } finally {
-      // Garante limpeza mesmo em caso de erro ou interrupção
+      // Para o ticker e limpa todos os glows
+      canvas.app.ticker.remove(positionTicker);
       this._clearAllGlows();
     }
   }
@@ -224,6 +244,7 @@ export default class WoD {
     if (!img) {
       img = document.createElement('img');
       img.id = `wod-glow-${token.id}`;
+      img.dataset.tokenId = token.id; // necessário para o ticker reposicionar
       img.classList.add('wod-glow-token');
       img.src = token.document.texture.src;
       img.style.pointerEvents = 'none';
