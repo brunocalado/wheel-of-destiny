@@ -18,7 +18,6 @@ Something bad is about to happen to someone in the room. But, you don't want to 
 - You can pick a folder with sounds. Then, one random sound will be played when you run the wheel.
 - You can target and pan to the token.
 - Sequencer Module: There will be an roulete animation played over the tokens.
-- Share Media Module: You can trigger a fullscreen image/video to hide the select token.
 
 ## How To
 
@@ -79,7 +78,6 @@ You can see changes at [CHANGELOG](CHANGELOG.md).
 - JB2A: https://jb2a.com/
 - Roll of Fate module. R.I.P.
 - Sequencer module.
-- Share Media module.
 - @PepijnMC
 
 ## Licenses

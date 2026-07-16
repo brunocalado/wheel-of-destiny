@@ -227,26 +227,6 @@ Hooks.once('init', () => {
     type: Number
   });
 
-  // call this with: game.settings.get(MODULE_ID, "flagShareMedia")
-  game.settings.register(MODULE_ID, "flagShareMedia", {
-    name: 'Share Media - Hide Interface',
-    hint: 'Check this to cover FVTT interface with an image/video. YOU MUST HAVE SHARE MEDIA ENABLED TO USE THIS. YOU MUST SET IMMERSIVE MODE IN SHARE MEDIA SETTINGS.',
-    scope: 'world',
-    config: true,
-    type: Boolean,
-    default: false
-  });
-
-  // call this with: game.settings.get(MODULE_ID, "flagShareMediaFile")
-  game.settings.register(MODULE_ID, "flagShareMediaFile", {
-    name: 'Share Media - File',
-    hint: 'Check this to cover FVTT interface with an image/video. YOU MUST HAVE SHARE MEDIA ENABLED TO USE THIS. YOU MUST SET IMMERSIVE MODE IN SHARE MEDIA SETTINGS.',
-    scope: 'world',
-    config: true,
-    type: String,
-    default: `modules/${MODULE_ID}/assets/counter.webm`,
-    filePicker: 'imagevideo'
-  });
 
 }); // END HOOKS
 

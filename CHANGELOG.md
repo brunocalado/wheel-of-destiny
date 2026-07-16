@@ -11,6 +11,7 @@
 - Fixed invalid `<body>` wrapper in `dialog.html` (template fragments must not use document-level tags)
 - Renamed `WoD.mjs` → `wod.mjs` and `dialog_autoselect.html` → `dialog-autoselect.hbs` to comply with kebab-case file naming convention
 - Converted all templates from `.html` to `.hbs`
+- Removed support for external module Share Media
 
 ## 0.3.1
 

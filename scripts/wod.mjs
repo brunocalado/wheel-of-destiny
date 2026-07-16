@@ -27,7 +27,6 @@ export default class WoD {
     const flagDialog = game.settings.get(MODULE_ID, "hasDialog");
     const flagSound = game.settings.get(MODULE_ID, "playSound");
     const sequencerAnimation = game.settings.get(MODULE_ID, "sequencerAnimation");
-    const flagShareMedia = game.settings.get(MODULE_ID, "flagShareMedia");
     const targetToken = game.settings.get(MODULE_ID, "targetToken");
     const panToToken = game.settings.get(MODULE_ID, "panToToken");
     const privacy = game.settings.get(MODULE_ID, "chatMessagePrivacy");
@@ -95,19 +94,6 @@ export default class WoD {
       }
       await this.sequencerAnimationRoulette(tokens, selectedToken);
       if ( privacy!='none' ) { this.createChatMessage(selectedToken, tokens, imagePath); }
-    }
-
-    if (flagShareMedia) {
-      if (!game.modules.get("share-media")?.active) {
-        ui.notifications.error("Please, activate Share Media module!");
-        return;
-      }
-      game.modules.get('share-media').api.fullscreenToAllUsers({
-        src: game.settings.get(MODULE_ID, "flagShareMediaFile"),
-        caption: '',
-        immersive: false,
-        darkness: false,
-      });
     }
 
     if (flagDialog) {
