@@ -17,7 +17,6 @@ Something bad is about to happen to someone in the room. But, you don't want to 
 - The select token will be display in the chat or a dialog.
 - You can pick a folder with sounds. Then, one random sound will be played when you run the wheel.
 - You can target and pan to the token.
-- Sequencer Module: There will be an roulete animation played over the tokens.
 
 ## How To
 
@@ -75,9 +74,7 @@ You can see changes at [CHANGELOG](CHANGELOG.md).
 
 ## Acknowledgements
 
-- JB2A: https://jb2a.com/
 - Roll of Fate module. R.I.P.
-- Sequencer module.
 - @PepijnMC
 
 ## Licenses

@@ -26,7 +26,7 @@ export default class WoD {
     let autoSelectBehavior = game.settings.get(MODULE_ID, "autoSelectBehavior");
     const flagDialog = game.settings.get(MODULE_ID, "hasDialog");
     const flagSound = game.settings.get(MODULE_ID, "playSound");
-    const sequencerAnimation = game.settings.get(MODULE_ID, "sequencerAnimation");
+    const animationMode = game.settings.get(MODULE_ID, "animationMode");
     const targetToken = game.settings.get(MODULE_ID, "targetToken");
     const panToToken = game.settings.get(MODULE_ID, "panToToken");
     const privacy = game.settings.get(MODULE_ID, "chatMessagePrivacy");
@@ -70,10 +70,10 @@ export default class WoD {
     const tokenName = selectedToken.document.name;
 
     // Target Token — use public API instead of private _onUpdateTokenTargets
-    if (sequencerAnimation=='none' && targetToken) { selectedToken.setTarget(true, { releaseOthers: true }); }
+    if (animationMode=='none' && targetToken) { selectedToken.setTarget(true, { releaseOthers: true }); }
 
     // Pan to Token
-    if (sequencerAnimation=='none' && panToToken) { this.panAndPingToken(selectedToken); }
+    if (animationMode=='none' && panToToken) { this.panAndPingToken(selectedToken); }
 
     let imagePath;
     if (game.settings.get(MODULE_ID, "imageSource")=='tokenart' ) {
@@ -83,20 +83,13 @@ export default class WoD {
     }
 
     // Chat
-    if (sequencerAnimation == 'none' && privacy != 'none') {
+    if (animationMode == 'none' && privacy != 'none') {
       this.createChatMessage(selectedToken, tokens, imagePath);
     }
 
-    if (sequencerAnimation === 'native') {
+    if (animationMode === 'native') {
       await this.playNativeRoulette(tokens, selectedToken);
       if (privacy != 'none') { this.createChatMessage(selectedToken, tokens, imagePath); }
-    } else if (sequencerAnimation != 'none') {
-      if (!game.modules.get("sequencer")?.active) {
-        ui.notifications.error("Please, activate Sequencer module!");
-        return;
-      }
-      await this.sequencerAnimationRoulette(tokens, selectedToken);
-      if ( privacy!='none' ) { this.createChatMessage(selectedToken, tokens, imagePath); }
     }
 
     if (flagDialog) {
@@ -171,50 +164,9 @@ export default class WoD {
   }
 
   //-----------------------------------------------
-  //
-  async sequencerAnimationRoulette(selectedTokens, selectedToken) {
-    const animation = game.settings.get(MODULE_ID, "sequencerRouleteAnimation");
-    let effectScale = 0.5;
-    let tokenSize;
-    const sequencerRouleteDelay = game.settings.get(MODULE_ID, "sequencerRouleteDelay");
-    let delay = 0;
-    const delayValue = 400 + sequencerRouleteDelay;
-
-    const index = selectedTokens.indexOf(selectedToken);
-    selectedTokens.splice(index, 1); // 2nd parameter means remove one item only
-    selectedTokens.push(selectedToken);
-
-    const targetToken = game.settings.get(MODULE_ID, "targetToken");
-    const panToToken = game.settings.get(MODULE_ID, "panToToken");
-
-    for (let i=0; i<2; i++) {
-      for(let iteratedToken of selectedTokens) {
-        delay = delayValue;
-        tokenSize = (iteratedToken.document.width + iteratedToken.document.height) / 2;
-        const out = await new Sequence()
-          .effect()
-            .file(animation)
-            .scale(effectScale * tokenSize)
-            .atLocation(iteratedToken)
-            //.belowTokens()
-            .repeats(1)
-            .delay(delay)
-            .fadeIn(200)
-            .fadeOut(200)
-            .duration(delayValue)
-        .play();
-      } // end for 2
-    } // end for 1
-
-    if (panToToken) { this.panAndPingToken(selectedToken); }
-    // Use public API instead of private _onUpdateTokenTargets
-    if (targetToken) { selectedToken.setTarget(true, { releaseOthers: true }); }
-  }
-
-  //-----------------------------------------------
-  // Native Roulette Animation (sem Sequencer)
+  // Native Roulette Animation
   async playNativeRoulette(tokens, selectedToken) {
-    const delay = 400 + game.settings.get(MODULE_ID, "sequencerRouleteDelay");
+    const delay = 400 + game.settings.get(MODULE_ID, "rouletteDelay");
 
     // Garante que o token sorteado é o último da lista (igual ao Sequencer)
     const list = [...tokens];

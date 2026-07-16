@@ -180,42 +180,25 @@ Hooks.once('init', () => {
     type: Number
   });
 
-  // call this with: game.settings.get(MODULE_ID, "sequencerAnimation")
-  game.settings.register(MODULE_ID, "sequencerAnimation", {
+  // call this with: game.settings.get(MODULE_ID, "animationMode")
+  game.settings.register(MODULE_ID, "animationMode", {
     name: 'Roulette - Animation Mode',
-    hint: 'Choose an animation for the roulette. "Native" requires no extra modules. "Sequencer" requires the Sequencer module + JB2A assets.',
+    hint: 'Choose an animation for the roulette.',
     scope: 'world',
     config: true,
     type: String,
     choices: {
       'none':    'Disabled',
-      'native':  'Native Glow (no dependencies)',
-      'roulete': 'Sequencer (requires Sequencer + JB2A)'
+      'native':  'Native Glow'
     },
     default: 'none'
   });
 
-  // call this with: game.settings.get(MODULE_ID, "sequencerRouleteAnimation")
-  game.settings.register(MODULE_ID, 'sequencerRouleteAnimation', {
-    name: 'Sequencer - Roulete Animation',
-    hint: 'You can pick one animation for the Roulete Animation.',
-    scope: "world",
-    type: String,
-    choices: {
-      [`modules/${MODULE_ID}/assets/animation/target-green.webm`]: 'Round - Green',
-      [`modules/${MODULE_ID}/assets/animation/target-pink.webm`]: 'Round - Pink',
-      [`modules/${MODULE_ID}/assets/animation/target-red.webm`]: 'Round - Red',
-      [`modules/${MODULE_ID}/assets/animation/target-triangle-green.webm`]: 'Triangle - Green',
-      [`modules/${MODULE_ID}/assets/animation/target-triangle-pink.webm`]: 'Triangle - Pink',
-      [`modules/${MODULE_ID}/assets/animation/target-triangle-red.webm`]: 'Triangle - Red'
-    },
-    default: `modules/${MODULE_ID}/assets/animation/target-red.webm`,
-    config: true
-  });
 
-  // call this with: game.settings.get(MODULE_ID, "sequencerRouleteDelay")
-  game.settings.register(MODULE_ID, 'sequencerRouleteDelay', {
-    name: 'Sequencer - Roulete Delay',
+
+  // call this with: game.settings.get(MODULE_ID, "rouletteDelay")
+  game.settings.register(MODULE_ID, 'rouletteDelay', {
+    name: 'Roulette - Animation Delay',
     hint: "You can modify the delay of the Roulete animation.",
     scope: 'world',
     config: true,

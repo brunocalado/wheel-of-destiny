@@ -12,8 +12,8 @@
 - Renamed `WoD.mjs` → `wod.mjs` and `dialog_autoselect.html` → `dialog-autoselect.hbs` to comply with kebab-case file naming convention
 - Converted all templates from `.html` to `.hbs`
 - Removed support for external module Share Media
-- Added a native, dependency-free "Native Glow" animation for the roulette using CSS and DOM overlay, eliminating the strict requirement for the Sequencer module and JB2A assets
-- Updated the "Sequencer - Play Animation" setting to "Roulette - Animation Mode" to support both Native Glow and Sequencer choices
+- Added a native, dependency-free "Native Glow" animation for the roulette using CSS and DOM overlay.
+- Removed all dependencies, settings, code and assets related to the Sequencer module and JB2A.
 
 ## 0.3.1
 
