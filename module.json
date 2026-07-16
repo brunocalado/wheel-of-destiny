@@ -18,7 +18,7 @@
   },
 
   "scripts": [],
-	"esmodules": ["./scripts/init.js"],
+	"esmodules": ["./scripts/constants.js", "./scripts/init.js"],
 
   "packs": [],
 

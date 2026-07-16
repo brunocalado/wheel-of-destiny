@@ -1,9 +1,18 @@
+/*!
+ * Wheel Of Destiny
+ * Copyright (c) 2026 https://github.com/brunocalado
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3.
+ */
+import { MODULE_ID } from "./constants.js";
+
 export default class WoD {
 
   constructor() {
     // Register native Foundry socket listener for cross-client dialog display.
     // The event name must match "module.<id>" because socket: true is declared in module.json.
-    game.socket.on("module.wheel-of-destiny", (payload) => {
+    game.socket.on(`module.${MODULE_ID}`, (payload) => {
       if (payload.action === "showDialogForEveryone") {
         this.showDialogForEveryone(payload.imagePath, payload.tokenName, payload.dimensions);
       }
@@ -14,14 +23,14 @@ export default class WoD {
     let tokens = canvas.tokens.controlled; // tokens
     const allTokens = canvas.tokens.placeables;
 
-    let autoSelectBehavior = game.settings.get("wheel-of-destiny", "autoSelectBehavior")
-    const flagDialog = game.settings.get("wheel-of-destiny", "hasDialog");
-    const flagSound = game.settings.get("wheel-of-destiny", "playSound");
-    const sequencerAnimation = game.settings.get("wheel-of-destiny", "sequencerAnimation");
-    const flagShareMedia = game.settings.get("wheel-of-destiny", "flagShareMedia");
-    const targetToken = game.settings.get("wheel-of-destiny", "targetToken");
-    const panToToken = game.settings.get("wheel-of-destiny", "panToToken");
-    const privacy = game.settings.get("wheel-of-destiny", "chatMessagePrivacy");
+    let autoSelectBehavior = game.settings.get(MODULE_ID, "autoSelectBehavior");
+    const flagDialog = game.settings.get(MODULE_ID, "hasDialog");
+    const flagSound = game.settings.get(MODULE_ID, "playSound");
+    const sequencerAnimation = game.settings.get(MODULE_ID, "sequencerAnimation");
+    const flagShareMedia = game.settings.get(MODULE_ID, "flagShareMedia");
+    const targetToken = game.settings.get(MODULE_ID, "targetToken");
+    const panToToken = game.settings.get(MODULE_ID, "panToToken");
+    const privacy = game.settings.get(MODULE_ID, "chatMessagePrivacy");
 
     // --------------------------------------------------
     // Error handling
@@ -61,14 +70,14 @@ export default class WoD {
     const selectedToken = this.selectRandomToken(tokens);
     const tokenName = selectedToken.document.name;
 
-    // Target Token
-    if (sequencerAnimation=='none' && targetToken) { game.user._onUpdateTokenTargets([selectedToken.id]); }
+    // Target Token — use public API instead of private _onUpdateTokenTargets
+    if (sequencerAnimation=='none' && targetToken) { selectedToken.setTarget(true, { releaseOthers: true }); }
 
     // Pan to Token
     if (sequencerAnimation=='none' && panToToken) { this.panAndPingToken(selectedToken); }
 
     let imagePath;
-    if (game.settings.get("wheel-of-destiny", "imageSource")=='tokenart' ) {
+    if (game.settings.get(MODULE_ID, "imageSource")=='tokenart' ) {
       imagePath = selectedToken.document.texture.src;
     } else {
       imagePath = selectedToken.document.actor.img;
@@ -94,7 +103,7 @@ export default class WoD {
         return;
       }
       game.modules.get('share-media').api.fullscreenToAllUsers({
-        src: game.settings.get("wheel-of-destiny", "flagShareMediaFile"),
+        src: game.settings.get(MODULE_ID, "flagShareMediaFile"),
         caption: '',
         immersive: false,
         darkness: false,
@@ -105,13 +114,13 @@ export default class WoD {
       const dimensions = await this.getDimensions(imagePath);
       // Emit to all other connected clients. The GM also calls it locally
       // because game.socket.emit does not trigger the sender's own listener.
-      game.socket.emit("module.wheel-of-destiny", { action: "showDialogForEveryone", imagePath, tokenName, dimensions });
+      game.socket.emit(`module.${MODULE_ID}`, { action: "showDialogForEveryone", imagePath, tokenName, dimensions });
       this.showDialogForEveryone(imagePath, tokenName, dimensions);
     }
 
     if (flagSound) {
-      const soundFolderPath = game.settings.get("wheel-of-destiny", "soundPath");
-      const soundVolume = game.settings.get("wheel-of-destiny", "soundVolume");
+      const soundFolderPath = game.settings.get(MODULE_ID, "soundPath");
+      const soundVolume = game.settings.get(MODULE_ID, "soundVolume");
 
       let {files} = await foundry.applications.apps.FilePicker.implementation.browse("data", soundFolderPath);
       const soundPath = files[Math.floor(Math.random() * files.length)];
@@ -147,9 +156,9 @@ export default class WoD {
       myDialogOptions['height'] = '100%';
     }
 
-    const topMessage = game.settings.get("wheel-of-destiny", "topMessage");
+    const topMessage = game.settings.get(MODULE_ID, "topMessage");
     const templateData = { imagePath: imagePath, tokenName: tokenName, topMessage: topMessage };
-    const myContent = await foundry.applications.handlebars.renderTemplate("modules/wheel-of-destiny/templates/dialog.html", templateData);
+    const myContent = await foundry.applications.handlebars.renderTemplate(`modules/${MODULE_ID}/templates/dialog.html`, templateData);
 
     foundry.applications.api.DialogV2.prompt({
         window: { title: tokenName },
@@ -175,10 +184,10 @@ export default class WoD {
   //-----------------------------------------------
   //
   async sequencerAnimationRoulette(selectedTokens, selectedToken) {
-    const animation = game.settings.get("wheel-of-destiny", "sequencerRouleteAnimation");
+    const animation = game.settings.get(MODULE_ID, "sequencerRouleteAnimation");
     let effectScale = 0.5;
     let tokenSize;
-    const sequencerRouleteDelay = game.settings.get("wheel-of-destiny", "sequencerRouleteDelay");
+    const sequencerRouleteDelay = game.settings.get(MODULE_ID, "sequencerRouleteDelay");
     let delay = 0;
     const delayValue = 400 + sequencerRouleteDelay;
 
@@ -186,8 +195,8 @@ export default class WoD {
     selectedTokens.splice(index, 1); // 2nd parameter means remove one item only
     selectedTokens.push(selectedToken);
 
-    const targetToken = game.settings.get("wheel-of-destiny", "targetToken");
-    const panToToken = game.settings.get("wheel-of-destiny", "panToToken");
+    const targetToken = game.settings.get(MODULE_ID, "targetToken");
+    const panToToken = game.settings.get(MODULE_ID, "panToToken");
 
     for (let i=0; i<2; i++) {
       for(let iteratedToken of selectedTokens) {
@@ -209,7 +218,8 @@ export default class WoD {
     } // end for 1
 
     if (panToToken) { this.panAndPingToken(selectedToken); }
-    if (targetToken) { game.user._onUpdateTokenTargets([selectedToken.id]); }
+    // Use public API instead of private _onUpdateTokenTargets
+    if (targetToken) { selectedToken.setTarget(true, { releaseOthers: true }); }
   }
 
   //-----------------------------------------------
@@ -235,8 +245,8 @@ export default class WoD {
   // Chat Message
   async createChatMessage(selectedToken, tokens, imagePath) {
     const tokenName = selectedToken.document.name;
-    const topMessage = game.settings.get("wheel-of-destiny", "topMessage");
-    const displaySelected = game.settings.get("wheel-of-destiny", "displaySelected");
+    const topMessage = game.settings.get(MODULE_ID, "topMessage");
+    const displaySelected = game.settings.get(MODULE_ID, "displaySelected");
 
     let tokensNameList = tokens.map(function(item){
        return `<li>${item.name}</li>`;
@@ -244,8 +254,8 @@ export default class WoD {
     tokensNameList = tokensNameList.join("");
 
     const templateData = { imagePath: imagePath, tokenName: tokenName, topMessage: topMessage, tokensNameList: tokensNameList, displaySelected: displaySelected };
-    const myContent = await foundry.applications.handlebars.renderTemplate("modules/wheel-of-destiny/templates/chat.html", templateData);
-    const privacy = game.settings.get("wheel-of-destiny", "chatMessagePrivacy");
+    const myContent = await foundry.applications.handlebars.renderTemplate(`modules/${MODULE_ID}/templates/chat.html`, templateData);
+    const privacy = game.settings.get(MODULE_ID, "chatMessagePrivacy");
 
     if (privacy=='gmonly') {
       ChatMessage.create({
@@ -260,7 +270,7 @@ export default class WoD {
   //
   async customAutoSelectDialog() {
     const templateData = {};
-    const myContent = await foundry.applications.handlebars.renderTemplate("modules/wheel-of-destiny/templates/dialog_autoselect.html", templateData);
+    const myContent = await foundry.applications.handlebars.renderTemplate(`modules/${MODULE_ID}/templates/dialog_autoselect.html`, templateData);
 
     const data = await foundry.applications.api.DialogV2.prompt({
       window: { title: "Wheel of Destiny" },
@@ -278,4 +288,3 @@ export default class WoD {
   }
 
 } // END CLASS
-

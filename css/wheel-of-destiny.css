@@ -1,73 +1,85 @@
-.wod-titulo {
-  background-color: black;
-  height: 26px;
-  color: beige;
-  font-size: 15px;
-  font-weight: 400;
-  text-align: center;
-  padding-top: 5px;
-}
+/*!
+ * Wheel Of Destiny
+ * Copyright (c) 2026 https://github.com/brunocalado
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3.
+ */
 
-.wod-boxcheck {
-  text-align: center;
-  justify-content: center;
-  margin-left: 5px;
-  font-size: 15px;
-  padding: 10px;
-}
+.wheel-of-destiny {
+  .wod-titulo {
+    background-color: black;
+    height: 26px;
+    color: beige;
+    font-size: 15px;
+    font-weight: 400;
+    text-align: center;
+    padding-top: 5px;
+  }
 
-.wod-boxcheckpai {
-  background-color: rgba(107, 107, 107, 0.166);
-  height: auto;
-  margin-bottom: 10px;
-}
+  .wod-boxcheck {
+    text-align: center;
+    justify-content: center;
+    margin-left: 5px;
+    font-size: 15px;
+    padding: 10px;
+  }
 
-.wod-containerform {
-  display: flex;
-}
+  .wod-boxcheckpai {
+    background-color: rgba(107, 107, 107, 0.166);
+    height: auto;
+    margin-bottom: 10px;
+  }
 
-.wod-containerduo {
-  height: 50%;
-  display: inline-block;
-}
+  .wod-containerform {
+    display: flex;
+  }
 
-.wod-container {
-  position: relative;
-  text-align: center;
-  color: white;
-}
+  .wod-containerduo {
+    height: 50%;
+    display: inline-block;
+  }
 
-/* Centered text */
-.wod-messageOnTop {
-  position: absolute;
-  top: 0%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  color: black;
-  width: 100%;
-}
+  .wod-container {
+    position: relative;
+    text-align: center;
+    color: white;
+  }
 
-/* Centered text */
-.wod-messageOnBottom {
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  color: black;
-  width: 100%;
-}
+  /* Centered text */
+  .wod-messageOnTop {
+    position: absolute;
+    top: 0%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    color: black;
+    width: 100%;
+  }
 
-.wod-chat-container {
-  font-size: 1.5em;
-  margin: 0.5em 0;
-}
-.wod-chat-image {
-  max-width: 6em;
-  display: block;
-  margin: 0 auto;
-}
-.wod-chat-token-name {
-  text-align: center;
+  /* Centered text */
+  .wod-messageOnBottom {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    color: black;
+    width: 100%;
+  }
+
+  .wod-chat-container {
+    font-size: 1.5em;
+    margin: 0.5em 0;
+  }
+
+  .wod-chat-image {
+    max-width: 6em;
+    display: block;
+    margin: 0 auto;
+  }
+
+  .wod-chat-token-name {
+    text-align: center;
+  }
 }

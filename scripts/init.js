@@ -1,4 +1,11 @@
-const moduleName = 'wheel-of-destiny';
+/*!
+ * Wheel Of Destiny
+ * Copyright (c) 2026 https://github.com/brunocalado
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3.
+ */
+import { MODULE_ID } from "./constants.js";
 import WoD from "./WoD.mjs";
 
 Hooks.once('init', () => {
@@ -13,7 +20,7 @@ Hooks.once('init', () => {
 
   // --------------------------------------------------
   // KEYBINDINGS
-  game.keybindings.register(moduleName, "wheel-of-destiny_keybinding", {
+  game.keybindings.register(MODULE_ID, `${MODULE_ID}_keybinding`, {
     name: '☯ Wheel of Destiny',
     hint: 'This will trigger the Wheel of Destiny.',
     editable: [{ key: "KeyF", modifiers: []}],
@@ -26,7 +33,7 @@ Hooks.once('init', () => {
     precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
   });
 
-  game.keybindings.register(moduleName, "wheel-of-destiny_keybinding_custom", {
+  game.keybindings.register(MODULE_ID, `${MODULE_ID}_keybinding_custom`, {
     name: '☯ Custom Wheel of Destiny',
     hint: 'This will trigger a dialog with options for the Wheel of Destiny.',
     editable: [{ key: "KeyF", modifiers: ["Shift"]}],
@@ -42,9 +49,9 @@ Hooks.once('init', () => {
   // --------------------------------------------------
   // SETTINGS
 
-  // call this with: game.settings.get("wheel-of-destiny", "chatMessagePrivacy")
-  game.settings.register(moduleName, 'chatMessagePrivacy', {
-    name: 'Chat Message Privacy', 
+  // call this with: game.settings.get(MODULE_ID, "chatMessagePrivacy")
+  game.settings.register(MODULE_ID, 'chatMessagePrivacy', {
+    name: 'Chat Message Privacy',
     hint: 'Choose who can see the chat message.',
     scope: "world",
     type: String,
@@ -57,39 +64,39 @@ Hooks.once('init', () => {
     config: true
   });
 
-  // call this with: game.settings.get("wheel-of-destiny", "displaySelected")
-  game.settings.register(moduleName, "displaySelected", {
-    name: 'Display Selected', //
-    hint: 'Check this to show the selected tokens.', //
+  // call this with: game.settings.get(MODULE_ID, "displaySelected")
+  game.settings.register(MODULE_ID, "displaySelected", {
+    name: 'Display Selected',
+    hint: 'Check this to show the selected tokens.',
     scope: 'world',
     config: true,
     type: Boolean,
     default: false
   });
 
-  // call this with: game.settings.get("wheel-of-destiny", "targetToken")
-  game.settings.register(moduleName, "targetToken", {
-    name: 'Target the Selected Token', //
-    hint: 'This will target the selected token.', //
+  // call this with: game.settings.get(MODULE_ID, "targetToken")
+  game.settings.register(MODULE_ID, "targetToken", {
+    name: 'Target the Selected Token',
+    hint: 'This will target the selected token.',
     scope: 'world',
     config: true,
     type: Boolean,
     default: true
   });
 
-  // call this with: game.settings.get("wheel-of-destiny", "panToToken")
-  game.settings.register(moduleName, "panToToken", {
-    name: 'Ping and Pan the Selected Token', //
-    hint: 'This will ping and pan the selected token.', //
+  // call this with: game.settings.get(MODULE_ID, "panToToken")
+  game.settings.register(MODULE_ID, "panToToken", {
+    name: 'Ping and Pan the Selected Token',
+    hint: 'This will ping and pan the selected token.',
     scope: 'world',
     config: true,
     type: Boolean,
     default: true
   });
 
-  // call this with: game.settings.get("wheel-of-destiny", "imageSource")
-  game.settings.register(moduleName, 'imageSource', {
-    name: 'Image Source', 
+  // call this with: game.settings.get(MODULE_ID, "imageSource")
+  game.settings.register(MODULE_ID, 'imageSource', {
+    name: 'Image Source',
     hint: 'Choose if you want to show the token art or the actor sheet art.',
     scope: "world",
     type: String,
@@ -101,9 +108,9 @@ Hooks.once('init', () => {
     config: true
   });
 
-  // call this with: game.settings.get("wheel-of-destiny", "autoSelectBehavior")
-  game.settings.register(moduleName, 'autoSelectBehavior', {
-    name: 'Auto Select Behavior', 
+  // call this with: game.settings.get(MODULE_ID, "autoSelectBehavior")
+  game.settings.register(MODULE_ID, 'autoSelectBehavior', {
+    name: 'Auto Select Behavior',
     hint: "This define the behavior of the auto selection, which trigger if you don't select any tokens.",
     scope: "world",
     type: String,
@@ -117,29 +124,29 @@ Hooks.once('init', () => {
     config: true
   });
 
-  // call this with: game.settings.get("wheel-of-destiny", "hasDialog")
-  game.settings.register(moduleName, "hasDialog", {
-    name: 'Show Dialog?', // 
-    hint: 'Check this to show a dialog message with the selected.', //
+  // call this with: game.settings.get(MODULE_ID, "hasDialog")
+  game.settings.register(MODULE_ID, "hasDialog", {
+    name: 'Show Dialog?',
+    hint: 'Check this to show a dialog message with the selected.',
     scope: 'world',
     config: true,
     type: Boolean,
     default: false
   });
 
-  // call this with: game.settings.get("wheel-of-destiny", "topMessage")
-  game.settings.register(moduleName, 'topMessage', {
-    name: 'Dialog Top Message', //
-    hint: 'The text you enter in here will show on the top of the dialog message.', //
+  // call this with: game.settings.get(MODULE_ID, "topMessage")
+  game.settings.register(MODULE_ID, 'topMessage', {
+    name: 'Dialog Top Message',
+    hint: 'The text you enter in here will show on the top of the dialog message.',
     scope: 'world',
     config: true,
     default: 'You have been chosen!',
     type: String
   });
 
-  // call this with: game.settings.get("wheel-of-destiny", "playSound")
-  game.settings.register(moduleName, "playSound", {
-    name: 'Play Sound', //
+  // call this with: game.settings.get(MODULE_ID, "playSound")
+  game.settings.register(MODULE_ID, "playSound", {
+    name: 'Play Sound',
     hint: 'Check this if you want a sound to be played.',
     scope: 'world',
     config: true,
@@ -147,19 +154,19 @@ Hooks.once('init', () => {
     default: false
   });
 
-  // call this with: game.settings.get("wheel-of-destiny", "soundPath")
-  game.settings.register(moduleName, 'soundPath', {
+  // call this with: game.settings.get(MODULE_ID, "soundPath")
+  game.settings.register(MODULE_ID, 'soundPath', {
     name: 'Sound Folder Path',
     hint: 'You can set a sound folder. The module will pick one playable sound from it. DO NOT ADD OTHER FILES. Just add the sounds you want to be played.',
     scope: 'world',
     config: true,
-    default: 'modules/wheel-of-destiny/assets/sounds',
+    default: `modules/${MODULE_ID}/assets/sounds`,
     type: String,
     filePicker: 'folder'
   });
 
-  // call this with: game.settings.get("wheel-of-destiny", "soundVolume")
-  game.settings.register(moduleName, 'soundVolume', {
+  // call this with: game.settings.get(MODULE_ID, "soundVolume")
+  game.settings.register(MODULE_ID, 'soundVolume', {
     name: 'Sound Volume',
     hint: "You can set the volume for the warning sound. Use 0.1 for 10% of the volume. 0.6 for 60% of the volume.",
     scope: 'client',
@@ -173,10 +180,10 @@ Hooks.once('init', () => {
     type: Number
   });
 
-  // call this with: game.settings.get("wheel-of-destiny", "sequencerAnimation")
-  game.settings.register(moduleName, "sequencerAnimation", {
-    name: 'Sequencer - Play Animation', //
-    hint: 'Choose a sequencer animation to play over the token. YOU MUST HAVE SEQUENCER ENABLED TO USE THIS.', //
+  // call this with: game.settings.get(MODULE_ID, "sequencerAnimation")
+  game.settings.register(MODULE_ID, "sequencerAnimation", {
+    name: 'Sequencer - Play Animation',
+    hint: 'Choose a sequencer animation to play over the token. YOU MUST HAVE SEQUENCER ENABLED TO USE THIS.',
     scope: 'world',
     config: true,
     type: String,
@@ -187,26 +194,26 @@ Hooks.once('init', () => {
     default: 'none'
   });
 
-  // call this with: game.settings.get("wheel-of-destiny", "sequencerRouleteAnimation")
-  game.settings.register(moduleName, 'sequencerRouleteAnimation', {
-    name: 'Sequencer - Roulete Animation', 
+  // call this with: game.settings.get(MODULE_ID, "sequencerRouleteAnimation")
+  game.settings.register(MODULE_ID, 'sequencerRouleteAnimation', {
+    name: 'Sequencer - Roulete Animation',
     hint: 'You can pick one animation for the Roulete Animation.',
     scope: "world",
     type: String,
     choices: {
-      'modules/wheel-of-destiny/assets/animation/target-green.webm': 'Round - Green',
-      'modules/wheel-of-destiny/assets/animation/target-pink.webm': 'Round - Pink',
-      'modules/wheel-of-destiny/assets/animation/target-red.webm': 'Round - Red',
-      'modules/wheel-of-destiny/assets/animation/target-triangle-green.webm': 'Triangle - Green',
-      'modules/wheel-of-destiny/assets/animation/target-triangle-pink.webm': 'Triangle - Pink',
-      'modules/wheel-of-destiny/assets/animation/target-triangle-red.webm': 'Triangle - Red'
+      [`modules/${MODULE_ID}/assets/animation/target-green.webm`]: 'Round - Green',
+      [`modules/${MODULE_ID}/assets/animation/target-pink.webm`]: 'Round - Pink',
+      [`modules/${MODULE_ID}/assets/animation/target-red.webm`]: 'Round - Red',
+      [`modules/${MODULE_ID}/assets/animation/target-triangle-green.webm`]: 'Triangle - Green',
+      [`modules/${MODULE_ID}/assets/animation/target-triangle-pink.webm`]: 'Triangle - Pink',
+      [`modules/${MODULE_ID}/assets/animation/target-triangle-red.webm`]: 'Triangle - Red'
     },
-    default: "modules/wheel-of-destiny/assets/animation/target-red.webm",
+    default: `modules/${MODULE_ID}/assets/animation/target-red.webm`,
     config: true
   });
 
-  // call this with: game.settings.get("wheel-of-destiny", "sequencerRouleteDelay")
-  game.settings.register(moduleName, 'sequencerRouleteDelay', {
+  // call this with: game.settings.get(MODULE_ID, "sequencerRouleteDelay")
+  game.settings.register(MODULE_ID, 'sequencerRouleteDelay', {
     name: 'Sequencer - Roulete Delay',
     hint: "You can modify the delay of the Roulete animation.",
     scope: 'world',
@@ -220,24 +227,24 @@ Hooks.once('init', () => {
     type: Number
   });
 
-  // call this with: game.settings.get("wheel-of-destiny", "flagShareMedia")
-  game.settings.register(moduleName, "flagShareMedia", {
-    name: 'Share Media - Hide Interface', // 
-    hint: 'Check this to cover FVTT interface with an image/video. YOU MUST HAVE SHARE MEDIA ENABLED TO USE THIS. YOU MUST SET IMMERSIVE MODE IN SHARE MEDIA SETTINGS.', // 
+  // call this with: game.settings.get(MODULE_ID, "flagShareMedia")
+  game.settings.register(MODULE_ID, "flagShareMedia", {
+    name: 'Share Media - Hide Interface',
+    hint: 'Check this to cover FVTT interface with an image/video. YOU MUST HAVE SHARE MEDIA ENABLED TO USE THIS. YOU MUST SET IMMERSIVE MODE IN SHARE MEDIA SETTINGS.',
     scope: 'world',
     config: true,
     type: Boolean,
     default: false
   });
 
-  // call this with: game.settings.get("wheel-of-destiny", "flagShareMediaFile")
-  game.settings.register(moduleName, "flagShareMediaFile", {
-    name: 'Share Media - File', // 
-    hint: 'Check this to cover FVTT interface with an image/video. YOU MUST HAVE SHARE MEDIA ENABLED TO USE THIS. YOU MUST SET IMMERSIVE MODE IN SHARE MEDIA SETTINGS.', // 
+  // call this with: game.settings.get(MODULE_ID, "flagShareMediaFile")
+  game.settings.register(MODULE_ID, "flagShareMediaFile", {
+    name: 'Share Media - File',
+    hint: 'Check this to cover FVTT interface with an image/video. YOU MUST HAVE SHARE MEDIA ENABLED TO USE THIS. YOU MUST SET IMMERSIVE MODE IN SHARE MEDIA SETTINGS.',
     scope: 'world',
     config: true,
     type: String,
-    default: 'modules/wheel-of-destiny/assets/counter.webm',
+    default: `modules/${MODULE_ID}/assets/counter.webm`,
     filePicker: 'imagevideo'
   });
 
@@ -245,9 +252,9 @@ Hooks.once('init', () => {
 
 Hooks.on("getSceneControlButtons", function(controls) {
   if (game.user.isGM) {
-    controls.tokens.tools['wheel-of-destiny_token_button'] = {
+    controls.tokens.tools[`${MODULE_ID}_token_button`] = {
       icon: "fas fa-yin-yang",
-      name: "wheel-of-destiny_token_button",
+      name: `${MODULE_ID}_token_button`,
       title: "☯ Wheel of Destiny",
       button: true,
       onChange: (event, active) => { if (active) window.game.wod.randomToken() }

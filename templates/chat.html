@@ -1,17 +1,19 @@
-<div>
-  <p>{{topMessage}}</p>
-</div>
+<div class="wheel-of-destiny">
+  <div>
+    <p>{{topMessage}}</p>
+  </div>
 
-<div class="wod-chat-container">
-  <img class="wod-chat-image" src="{{imagePath}}">
-  <div class="wod-chat-token-name">{{tokenName}}</div>
-</div>
+  <div class="wod-chat-container">
+    <img class="wod-chat-image" src="{{imagePath}}">
+    <div class="wod-chat-token-name">{{tokenName}}</div>
+  </div>
 
-{{#if this.displaySelected}}
-  <details>
-    <summary>Token List</summary>
-    <ul>
-      {{{tokensNameList}}}
-    </ul>
-  </details>
-{{/if}}
+  {{#if this.displaySelected}}
+    <details>
+      <summary>Token List</summary>
+      <ul>
+        {{{tokensNameList}}}
+      </ul>
+    </details>
+  {{/if}}
+</div>

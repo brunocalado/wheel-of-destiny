@@ -3,6 +3,12 @@
 ## 0.4.0
 
 - Removed socketlib dependency; real-time communication now uses Foundry VTT's native socket API (`game.socket.emit` / `game.socket.on`)
+- Created `scripts/constants.js` as single source of truth for `MODULE_ID`
+- Replaced all `'wheel-of-destiny'` string literals across `init.js` and `WoD.mjs` with imported `MODULE_ID` (settings, keybindings, socket events, asset paths)
+- Added GPL-3 license header to all `.js` and `.css` files per project convention
+- Replaced private API call `game.user._onUpdateTokenTargets()` with public `selectedToken.setTarget(true, { releaseOthers: true })`
+- Scoped all CSS rules inside `.wheel-of-destiny { }` to prevent stylesheet leaks; added `<div class="wheel-of-destiny">` wrapper to all templates
+- Fixed invalid `<body>` wrapper in `dialog.html` (template fragments must not use document-level tags)
 
 ## 0.3.1
 
