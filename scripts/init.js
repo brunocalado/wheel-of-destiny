@@ -6,14 +6,22 @@
  * it under the terms of the GNU General Public License version 3.
  */
 import { MODULE_ID } from "./constants.js";
-import WoD from "./wod.mjs";
+import WheelOfDestiny from "./wod.js";
 import { registerSettings } from "./settings.js";
+
+/**
+ * The live module API, published on `globalThis` as `WoD` so macros can call
+ * `WoD.randomToken()` directly. Built during `init` rather than at module scope
+ * because the constructor registers a `game.socket` listener.
+ * @type {WheelOfDestiny}
+ */
+let api;
 
 Hooks.once('init', () => {
   // --------------------------------------------------
   // Load API
-  let wod = new WoD();
-  window.game.wod = wod; // Request: //window.game.wod.randomToken();
+  api = new WheelOfDestiny();
+  globalThis.WoD = api; // Public macro API: WoD.randomToken(), WoD.customAutoSelectDialog(), ...
 
   // --------------------------------------------------
   // Functions
@@ -26,7 +34,7 @@ Hooks.once('init', () => {
     hint: 'This will trigger the Wheel of Destiny.',
     editable: [{ key: "KeyF", modifiers: []}],
     onDown: () => {
-      window.game.wod.randomToken();
+      api.randomToken();
     },
     onUp: () => {},
     restricted: true,  // Restrict this Keybinding to gamemaster only?
@@ -39,7 +47,7 @@ Hooks.once('init', () => {
     hint: 'This will trigger a dialog with options for the Wheel of Destiny.',
     editable: [{ key: "KeyF", modifiers: ["Shift"]}],
     onDown: () => {
-      window.game.wod.customAutoSelectDialog();
+      api.customAutoSelectDialog();
     },
     onUp: () => {},
     restricted: true,  // Restrict this Keybinding to gamemaster only?
@@ -60,7 +68,7 @@ Hooks.on("getSceneControlButtons", function(controls) {
       name: `${MODULE_ID}_token_button`,
       title: "☯ Wheel of Destiny",
       button: true,
-      onChange: (event, active) => { if (active) window.game.wod.randomToken() }
+      onChange: (event, active) => { if (active) api.randomToken() }
     }
   }
 });

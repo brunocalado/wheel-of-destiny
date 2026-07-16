@@ -9,7 +9,8 @@
 - Replaced private API call `game.user._onUpdateTokenTargets()` with public `selectedToken.setTarget(true, { releaseOthers: true })`
 - Scoped all CSS rules inside `.wheel-of-destiny { }` to prevent stylesheet leaks; added `<div class="wheel-of-destiny">` wrapper to all templates
 - Fixed invalid `<body>` wrapper in `dialog.html` (template fragments must not use document-level tags)
-- Renamed `WoD.mjs` → `wod.mjs` and `dialog_autoselect.html` → `dialog-autoselect.hbs` to comply with kebab-case file naming convention
+- Renamed `WoD.mjs` → `wod.js` and `dialog_autoselect.html` → `dialog-autoselect.hbs` to comply with kebab-case file naming convention
+- **Breaking:** the macro API moved from `window.game.wod` to the global `WoD` (e.g. `WoD.randomToken()`, `WoD.customAutoSelectDialog()`, `WoD.selectRandomToken(tokens)`). The old `game.wod` entry point was removed with no fallback — update existing macros.
 - Converted all templates from `.html` to `.hbs`
 - Removed support for external module Share Media
 - Added a native, dependency-free "Native Glow" animation for the roulette using CSS and DOM overlay.

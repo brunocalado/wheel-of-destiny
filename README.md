@@ -34,25 +34,25 @@ You can trigger Wheel of Destiny with the following code. This can be used by ma
 ### This do same as trigger the button or shortcut.
 
 ```js
-  window.game.wod.randomToken();
+  WoD.randomToken();
 ```
 
 ### This will open a dialog asking for the Auto Select behavior.
 
 ```js
-  window.game.wod.customAutoSelectDialog();
+  WoD.customAutoSelectDialog();
 ```
 
 ### You can pass a custom token list. It'll return the selected token. All WoD features will be triggered.
 
 ```js
-  const mySelectedToken = window.game.wod.randomToken(customTokenList=[]);
+  const mySelectedToken = await WoD.randomToken(myTokenList);
 ```
 
 ### You can pass a custom token list. It'll return the selected token.
 
 ```js
-  const mySelectedToken = window.game.wod.selectRandomToken(tokens=[]);
+  const mySelectedToken = WoD.selectRandomToken(myTokenList);
 ```
   
 ## Keybindings
