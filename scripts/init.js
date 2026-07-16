@@ -182,14 +182,15 @@ Hooks.once('init', () => {
 
   // call this with: game.settings.get(MODULE_ID, "sequencerAnimation")
   game.settings.register(MODULE_ID, "sequencerAnimation", {
-    name: 'Sequencer - Play Animation',
-    hint: 'Choose a sequencer animation to play over the token. YOU MUST HAVE SEQUENCER ENABLED TO USE THIS.',
+    name: 'Roulette - Animation Mode',
+    hint: 'Choose an animation for the roulette. "Native" requires no extra modules. "Sequencer" requires the Sequencer module + JB2A assets.',
     scope: 'world',
     config: true,
     type: String,
     choices: {
-      'none': 'Disabled',
-      'roulete': 'Roulete'
+      'none':    'Disabled',
+      'native':  'Native Glow (no dependencies)',
+      'roulete': 'Sequencer (requires Sequencer + JB2A)'
     },
     default: 'none'
   });

@@ -83,3 +83,46 @@
     text-align: center;
   }
 }
+
+/* -------------------------------------------------------
+ * Native Roulette Glow — canvas overlay, efêmero
+ * @keyframes e img.wod-glow-token ficam no root porque
+ * os elementos são appendados no parentElement do canvas,
+ * fora do escopo .wheel-of-destiny.
+ * ------------------------------------------------------- */
+
+@keyframes wodGlowPulse {
+  0% {
+    filter: drop-shadow(0 0 4px rgba(var(--wod-r), var(--wod-g), var(--wod-b), 0.6))
+            drop-shadow(0 0 8px rgba(var(--wod-r), var(--wod-g), var(--wod-b), 0.4));
+    opacity: 0.7;
+  }
+  100% {
+    filter: drop-shadow(0 0 14px rgba(var(--wod-r), var(--wod-g), var(--wod-b), 1.0))
+            drop-shadow(0 0 28px rgba(var(--wod-r), var(--wod-g), var(--wod-b), 0.85));
+    opacity: 1.0;
+  }
+}
+
+img.wod-glow-token {
+  position: absolute;
+  pointer-events: none;
+  box-sizing: border-box;
+  z-index: 200;
+  /* dourado — token passando */
+  --wod-r: 255;
+  --wod-g: 200;
+  --wod-b: 50;
+  object-fit: contain;
+  mix-blend-mode: screen;
+  animation: wodGlowPulse 0.4s infinite alternate ease-in-out;
+  transform: translate(-50%, -50%);
+}
+
+/* Token sorteado: glow mais intenso e mais rápido */
+img.wod-glow-token.wod-glow-final {
+  --wod-r: 255;
+  --wod-g: 240;
+  --wod-b: 80;
+  animation: wodGlowPulse 0.22s infinite alternate ease-in-out;
+}

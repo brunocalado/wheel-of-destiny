@@ -87,7 +87,10 @@ export default class WoD {
       this.createChatMessage(selectedToken, tokens, imagePath);
     }
 
-    if (sequencerAnimation != 'none') {
+    if (sequencerAnimation === 'native') {
+      await this.playNativeRoulette(tokens, selectedToken);
+      if (privacy != 'none') { this.createChatMessage(selectedToken, tokens, imagePath); }
+    } else if (sequencerAnimation != 'none') {
       if (!game.modules.get("sequencer")?.active) {
         ui.notifications.error("Please, activate Sequencer module!");
         return;
@@ -206,6 +209,102 @@ export default class WoD {
     if (panToToken) { this.panAndPingToken(selectedToken); }
     // Use public API instead of private _onUpdateTokenTargets
     if (targetToken) { selectedToken.setTarget(true, { releaseOthers: true }); }
+  }
+
+  //-----------------------------------------------
+  // Native Roulette Animation (sem Sequencer)
+  async playNativeRoulette(tokens, selectedToken) {
+    const delay = 400 + game.settings.get(MODULE_ID, "sequencerRouleteDelay");
+
+    // Garante que o token sorteado é o último da lista (igual ao Sequencer)
+    const list = [...tokens];
+    const idx = list.indexOf(selectedToken);
+    list.splice(idx, 1);
+    list.push(selectedToken);
+
+    const targetToken = game.settings.get(MODULE_ID, "targetToken");
+    const panToToken   = game.settings.get(MODULE_ID, "panToToken");
+
+    try {
+      // 2 voltas nos tokens (mesmo comportamento do Sequencer original)
+      for (let pass = 0; pass < 2; pass++) {
+        for (const token of list) {
+          const isFinalMoment = (pass === 1 && token === selectedToken);
+          this._showTokenGlow(token, isFinalMoment);
+          await this._sleep(delay);
+          // Apaga imediatamente — exceto o sorteado no momento final
+          if (!isFinalMoment) {
+            this._hideTokenGlow(token.id);
+          }
+        }
+      }
+
+      // Token sorteado ainda brilhando: pan, target e espera antes de apagar
+      if (panToToken)  { this.panAndPingToken(selectedToken); }
+      if (targetToken) { selectedToken.setTarget(true, { releaseOthers: true }); }
+
+      await this._sleep(2000);
+
+    } finally {
+      // Garante limpeza mesmo em caso de erro ou interrupção
+      this._clearAllGlows();
+    }
+  }
+
+  // --- Helpers: glow DOM overlay ---
+
+  // Converte coordenadas de mundo PIXI para pixels de tela
+  _worldToScreen(worldPos) {
+    const t = canvas.stage.worldTransform;
+    return {
+      x: worldPos.x * t.a + t.tx,
+      y: worldPos.y * t.d + t.ty
+    };
+  }
+
+  _sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  // Cria ou atualiza a img de glow sobre o token
+  _showTokenGlow(token, isFinal = false) {
+    let img = document.getElementById(`wod-glow-${token.id}`);
+    if (!img) {
+      img = document.createElement('img');
+      img.id = `wod-glow-${token.id}`;
+      img.classList.add('wod-glow-token');
+      img.src = token.document.texture.src;
+      img.style.pointerEvents = 'none';
+      img.style.objectFit = 'contain';
+      const parent = canvas.app?.view?.parentElement ?? document.body;
+      parent.appendChild(img);
+    }
+
+    // Classe final: glow mais intenso para o sorteado
+    img.classList.toggle('wod-glow-final', isFinal);
+
+    // Dimensões respeitando tamanho do token e zoom atual
+    const scaleX = Math.abs(token.document.texture?.scaleX ?? 1);
+    const scaleY = Math.abs(token.document.texture?.scaleY ?? 1);
+    const w = token.document.width  * canvas.grid.size * canvas.stage.scale.x * scaleX;
+    const h = token.document.height * canvas.grid.size * canvas.stage.scale.y * scaleY;
+    const pos = this._worldToScreen(token.center);
+
+    img.style.width   = `${w}px`;
+    img.style.height  = `${h}px`;
+    img.style.left    = `${pos.x}px`;
+    img.style.top     = `${pos.y}px`;
+    img.style.display = '';
+  }
+
+  // Remove o glow de um token específico
+  _hideTokenGlow(tokenId) {
+    document.getElementById(`wod-glow-${tokenId}`)?.remove();
+  }
+
+  // Remove todos os glows (limpeza de emergência)
+  _clearAllGlows() {
+    document.querySelectorAll('img.wod-glow-token').forEach(el => el.remove());
   }
 
   //-----------------------------------------------
