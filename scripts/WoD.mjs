@@ -158,7 +158,7 @@ export default class WoD {
 
     const topMessage = game.settings.get(MODULE_ID, "topMessage");
     const templateData = { imagePath: imagePath, tokenName: tokenName, topMessage: topMessage };
-    const myContent = await foundry.applications.handlebars.renderTemplate(`modules/${MODULE_ID}/templates/dialog.html`, templateData);
+    const myContent = await foundry.applications.handlebars.renderTemplate(`modules/${MODULE_ID}/templates/dialog.hbs`, templateData);
 
     foundry.applications.api.DialogV2.prompt({
         window: { title: tokenName },
@@ -254,7 +254,7 @@ export default class WoD {
     tokensNameList = tokensNameList.join("");
 
     const templateData = { imagePath: imagePath, tokenName: tokenName, topMessage: topMessage, tokensNameList: tokensNameList, displaySelected: displaySelected };
-    const myContent = await foundry.applications.handlebars.renderTemplate(`modules/${MODULE_ID}/templates/chat.html`, templateData);
+    const myContent = await foundry.applications.handlebars.renderTemplate(`modules/${MODULE_ID}/templates/chat.hbs`, templateData);
     const privacy = game.settings.get(MODULE_ID, "chatMessagePrivacy");
 
     if (privacy=='gmonly') {
@@ -270,7 +270,7 @@ export default class WoD {
   //
   async customAutoSelectDialog() {
     const templateData = {};
-    const myContent = await foundry.applications.handlebars.renderTemplate(`modules/${MODULE_ID}/templates/dialog_autoselect.html`, templateData);
+    const myContent = await foundry.applications.handlebars.renderTemplate(`modules/${MODULE_ID}/templates/dialog-autoselect.hbs`, templateData);
 
     const data = await foundry.applications.api.DialogV2.prompt({
       window: { title: "Wheel of Destiny" },

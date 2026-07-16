@@ -6,7 +6,7 @@
  * it under the terms of the GNU General Public License version 3.
  */
 import { MODULE_ID } from "./constants.js";
-import WoD from "./WoD.mjs";
+import WoD from "./wod.mjs";
 
 Hooks.once('init', () => {
   // --------------------------------------------------

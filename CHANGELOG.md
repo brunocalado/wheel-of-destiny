@@ -9,6 +9,8 @@
 - Replaced private API call `game.user._onUpdateTokenTargets()` with public `selectedToken.setTarget(true, { releaseOthers: true })`
 - Scoped all CSS rules inside `.wheel-of-destiny { }` to prevent stylesheet leaks; added `<div class="wheel-of-destiny">` wrapper to all templates
 - Fixed invalid `<body>` wrapper in `dialog.html` (template fragments must not use document-level tags)
+- Renamed `WoD.mjs` → `wod.mjs` and `dialog_autoselect.html` → `dialog-autoselect.hbs` to comply with kebab-case file naming convention
+- Converted all templates from `.html` to `.hbs`
 
 ## 0.3.1
 
