@@ -14,6 +14,10 @@
 - Removed support for external module Share Media
 - Added a native, dependency-free "Native Glow" animation for the roulette using CSS and DOM overlay.
 - Removed all dependencies, settings, code and assets related to the Sequencer module and JB2A.
+- Reorganized module settings using `ApplicationV2` and `HandlebarsApplicationMixin`, grouping most settings into 3 dedicated menus (Audio & Sound, Animation & Visual, Dialogs & Chat).
+- Added a new `soundChannel` setting to allow GMs to choose the audio channel (Interface, Music, Ambient, Effects).
+- Added a "Preview Sound" button to the Audio & Sound menu for testing sounds before saving.
+- Removed the `soundVolume` setting from the UI (now relies on Foundry's native volume mixer per client).
 
 ## 0.3.1
 

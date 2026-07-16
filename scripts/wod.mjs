@@ -101,22 +101,57 @@ export default class WoD {
     }
 
     if (flagSound) {
-      const soundFolderPath = game.settings.get(MODULE_ID, "soundPath");
-      const soundVolume = game.settings.get(MODULE_ID, "soundVolume");
-
-      let {files} = await foundry.applications.apps.FilePicker.implementation.browse("data", soundFolderPath);
-      const soundPath = files[Math.floor(Math.random() * files.length)];
-
-      foundry.audio.AudioHelper.play({
-        src: soundPath,
-        volume: soundVolume,
-        autoplay: true,
-        loop: false
-      }, true);
+      await WoD.playRandomSound();
     }
 
     return selectedToken;
   } // END
+
+  //-----------------------------------------------
+  // Random Sound Playback
+  /**
+   * Plays one random sound from a folder on a Foundry audio channel.
+   *
+   * Shared by the draw and by the Preview button in the audio settings window, which
+   * passes the values still sitting unsaved in its form — hence the overrides.
+   *
+   * @param {object} [options]
+   * @param {string} [options.folderPath] Folder to pick from. Defaults to the `soundPath` setting.
+   * @param {string} [options.channel] A CONST.AUDIO_CHANNELS key. Defaults to the `soundChannel` setting.
+   * @param {boolean} [options.broadcast=true] Whether every connected client hears it.
+   * @returns {Promise<void>}
+   */
+  static async playRandomSound({ folderPath, channel, broadcast = true } = {}) {
+    folderPath ??= game.settings.get(MODULE_ID, "soundPath");
+    channel ??= game.settings.get(MODULE_ID, "soundChannel");
+
+    const FilePickerClass = foundry.applications.apps.FilePicker.implementation ?? foundry.applications.apps.FilePicker;
+
+    let files;
+    try {
+      ({ files } = await FilePickerClass.browse("data", folderPath));
+    } catch {
+      ui.notifications.warn('☯ ' + `Could not read the sound folder "${folderPath}".`);
+      return;
+    }
+
+    if (!files.length) {
+      ui.notifications.warn('☯ ' + `There are no files in the sound folder "${folderPath}".`);
+      return;
+    }
+
+    const src = files[Math.floor(Math.random() * files.length)];
+
+    // Full gain on purpose: the channel level is what each user controls in Foundry's
+    // mixer, so the module plays at 1.0 and lets the channel scale it from there.
+    foundry.audio.AudioHelper.play({
+      src: src,
+      channel: channel,
+      volume: 1.0,
+      autoplay: true,
+      loop: false
+    }, broadcast);
+  }
 
   //-----------------------------------------------
   // Show dialog everyone

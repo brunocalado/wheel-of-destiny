@@ -1,0 +1,17 @@
+/*!
+ * Wheel Of Destiny
+ * Copyright (c) 2026 https://github.com/brunocalado
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3.
+ */
+
+/* AnimationSettingsForm — styles/settings-animation.hbs */
+
+.wheel-of-destiny {
+  /* The delay slider ships with a linked number field; give the pair the full row
+   * so the slider stays usable at the window's width. */
+  &.wod-settings-form range-picker {
+    flex: 1;
+  }
+}

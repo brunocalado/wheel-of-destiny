@@ -1,0 +1,16 @@
+/*!
+ * Wheel Of Destiny
+ * Copyright (c) 2026 https://github.com/brunocalado
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3.
+ */
+
+/* DialogSettingsForm — styles/settings-dialogs.hbs */
+
+.wheel-of-destiny {
+  /* Free-text announcement line — worth the whole row. */
+  &.wod-settings-form [name="topMessage"] {
+    flex: 1;
+  }
+}

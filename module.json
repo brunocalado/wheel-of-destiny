@@ -23,7 +23,11 @@
   "packs": [],
 
   "styles": [
-    "css/wheel-of-destiny.css"
+    "css/wheel-of-destiny.css",
+    "styles/base.css",
+    "styles/settings-audio.css",
+    "styles/settings-animation.css",
+    "styles/settings-dialogs.css"
   ],
 
   "languages": [

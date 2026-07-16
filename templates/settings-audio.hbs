@@ -1,0 +1,41 @@
+{{! Rendered by AudioSettingsForm. The root <form> is the Application element itself
+    (DEFAULT_OPTIONS.tag), so this part must not declare a <form> of its own. }}
+<div class="wod-settings-body">
+
+  <div class="form-group">
+    <label>{{settings.playSound.name}}</label>
+    <div class="form-fields">
+      <input type="checkbox" name="playSound" data-dtype="Boolean" {{checked settings.playSound.value}}>
+    </div>
+    <p class="hint">{{settings.playSound.hint}}</p>
+  </div>
+
+  <div class="form-group">
+    <label>{{settings.soundPath.name}}</label>
+    <div class="form-fields">
+      <file-picker name="soundPath" type="folder" value="{{settings.soundPath.value}}"></file-picker>
+    </div>
+    <p class="hint">{{settings.soundPath.hint}}</p>
+  </div>
+
+  <div class="form-group">
+    <label>{{settings.soundChannel.name}}</label>
+    <div class="form-fields">
+      <select name="soundChannel">
+        {{selectOptions settings.soundChannel.choices selected=settings.soundChannel.value}}
+      </select>
+    </div>
+    <p class="hint">{{settings.soundChannel.hint}}</p>
+  </div>
+
+  <footer class="wod-settings-footer">
+    {{! type="button" keeps the preview out of the submit flow — it plays, it never saves. }}
+    <button type="button" data-action="previewSound">
+      <i class="fas fa-play"></i> Preview Sound
+    </button>
+    <button type="submit">
+      <i class="fas fa-save"></i> Save Changes
+    </button>
+  </footer>
+
+</div>

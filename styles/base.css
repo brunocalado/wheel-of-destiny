@@ -1,0 +1,22 @@
+/*!
+ * Wheel Of Destiny
+ * Copyright (c) 2026 https://github.com/brunocalado
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3.
+ */
+
+/* Module-wide custom properties and the layout shared by the three grouped
+ * settings windows. Per-window rules live in styles/settings-<name>.css.
+ * Field spacing itself comes from core's `standard-form` content class. */
+
+.wheel-of-destiny {
+  --wod-settings-gap: 0.5rem;
+
+  &.wod-settings-form .wod-settings-footer {
+    display: flex;
+    align-items: center;
+    gap: var(--wod-settings-gap);
+    margin-top: var(--wod-settings-gap);
+  }
+}

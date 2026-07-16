@@ -1,0 +1,22 @@
+/*!
+ * Wheel Of Destiny
+ * Copyright (c) 2026 https://github.com/brunocalado
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3.
+ */
+
+/* AudioSettingsForm — styles/settings-audio.hbs */
+
+.wheel-of-destiny {
+  /* Preview only tests the folder, it never saves — park it away from the Save
+   * button so the two are not mistaken for each other. */
+  &.wod-settings-form [data-action="previewSound"] {
+    margin-right: auto;
+  }
+
+  /* The folder field should take the row; its browse button is fixed width. */
+  &.wod-settings-form file-picker {
+    flex: 1;
+  }
+}

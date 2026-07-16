@@ -1,0 +1,37 @@
+{{! Rendered by DialogSettingsForm. The root <form> is the Application element itself
+    (DEFAULT_OPTIONS.tag), so this part must not declare a <form> of its own. }}
+<div class="wod-settings-body">
+
+  <div class="form-group">
+    <label>{{settings.hasDialog.name}}</label>
+    <div class="form-fields">
+      <input type="checkbox" name="hasDialog" data-dtype="Boolean" {{checked settings.hasDialog.value}}>
+    </div>
+    <p class="hint">{{settings.hasDialog.hint}}</p>
+  </div>
+
+  <div class="form-group">
+    <label>{{settings.topMessage.name}}</label>
+    <div class="form-fields">
+      <input type="text" name="topMessage" value="{{settings.topMessage.value}}">
+    </div>
+    <p class="hint">{{settings.topMessage.hint}}</p>
+  </div>
+
+  <div class="form-group">
+    <label>{{settings.chatMessagePrivacy.name}}</label>
+    <div class="form-fields">
+      <select name="chatMessagePrivacy">
+        {{selectOptions settings.chatMessagePrivacy.choices selected=settings.chatMessagePrivacy.value}}
+      </select>
+    </div>
+    <p class="hint">{{settings.chatMessagePrivacy.hint}}</p>
+  </div>
+
+  <footer class="wod-settings-footer">
+    <button type="submit">
+      <i class="fas fa-save"></i> Save Changes
+    </button>
+  </footer>
+
+</div>
