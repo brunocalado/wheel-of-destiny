@@ -1,8 +1,13 @@
 export default class WoD {
 
   constructor() {
-    this.socket = socketlib.registerModule('wheel-of-destiny');
-    this.socket.register("showDialogForEveryone", this.showDialogForEveryone);    // Dialog
+    // Register native Foundry socket listener for cross-client dialog display.
+    // The event name must match "module.<id>" because socket: true is declared in module.json.
+    game.socket.on("module.wheel-of-destiny", (payload) => {
+      if (payload.action === "showDialogForEveryone") {
+        this.showDialogForEveryone(payload.imagePath, payload.tokenName, payload.dimensions);
+      }
+    });
   }
 
   async randomToken(customTokenList=[], customAutoSelect=null) {
@@ -98,7 +103,10 @@ export default class WoD {
 
     if (flagDialog) {
       const dimensions = await this.getDimensions(imagePath);
-      this.socket.executeForEveryone(this.showDialogForEveryone, imagePath, tokenName, dimensions);
+      // Emit to all other connected clients. The GM also calls it locally
+      // because game.socket.emit does not trigger the sender's own listener.
+      game.socket.emit("module.wheel-of-destiny", { action: "showDialogForEveryone", imagePath, tokenName, dimensions });
+      this.showDialogForEveryone(imagePath, tokenName, dimensions);
     }
 
     if (flagSound) {

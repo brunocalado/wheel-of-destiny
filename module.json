@@ -31,13 +31,7 @@
   ],
 
   "relationships": {
-    "requires": [
-      {
-        "id": "socketlib",
-        "type": "module",
-        "manifest": "https://raw.githubusercontent.com/manuelVo/foundryvtt-socketlib/master/module.json"
-      }
-    ]
+    "requires": []
   },
 
   "socket": true,

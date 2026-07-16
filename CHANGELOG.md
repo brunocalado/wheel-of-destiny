@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.4.0
+
+- Removed socketlib dependency; real-time communication now uses Foundry VTT's native socket API (`game.socket.emit` / `game.socket.on`)
+
 ## 0.3.1
 
 - Fix some CSS class names that conflicted with system classes
