@@ -20,6 +20,7 @@
 - Added a "Preview Sound" button to the Audio & Sound menu for testing sounds before saving.
 - Removed the `soundVolume` setting from the UI (now relies on Foundry's native volume mixer per client).
 - Reduced chat message visual size: decreased `.wod-chat-container` font-size from `1.5em` to `1em`, margin from `0.5em` to `0.25em`, and `.wod-chat-image` max-width from `6em` to `3.5em`.
+- Added support for non-GM players: players can now use the Wheel of Destiny button to randomly select from their targeted tokens.
 
 ## 0.3.1
 

@@ -16,6 +16,13 @@ export default class WoD {
       if (payload.action === "showDialogForEveryone") {
         this.showDialogForEveryone(payload.imagePath, payload.tokenName, payload.dimensions);
       }
+      if (payload.action === "playSoundForEveryone") {
+        // Picking the sound needs FILES_BROWSE, which defaults to the TRUSTED role, so a
+        // player's draw delegates it instead of browsing locally. activeGM designates a
+        // single GM — without it every connected GM would pick a different sound and
+        // broadcast it, stacking them.
+        if (game.users.activeGM?.isSelf) WoD.playRandomSound();
+      }
     });
   }
 
@@ -34,7 +41,16 @@ export default class WoD {
     // --------------------------------------------------
     // Error handling
 
-    if (customTokenList.length > 0) {
+    if (!game.user.isGM) {
+      // Non-GM draws are restricted to the user's own targets. The auto-select behaviors
+      // reach every token in the scene, which is not a player's to draw from, so they are
+      // skipped here — as is customTokenList, which would otherwise let a macro widen the pool.
+      tokens = [...game.user.targets]; // Set → Array
+      if (tokens.length < 1) {
+        ui.notifications.notify( '☯ ' + 'You must target at least one token first.', 'error', {permanent: false});
+        return;
+      }
+    } else if (customTokenList.length > 0) {
       tokens = customTokenList;
     } else {
       if (tokens.length < 1) { // Auto Select All
@@ -101,7 +117,8 @@ export default class WoD {
     }
 
     if (flagSound) {
-      await WoD.playRandomSound();
+      if (game.user.isGM) await WoD.playRandomSound();
+      else game.socket.emit(`module.${MODULE_ID}`, { action: "playSoundForEveryone" });
     }
 
     return selectedToken;
@@ -351,8 +368,11 @@ export default class WoD {
     const privacy = game.settings.get(MODULE_ID, "chatMessagePrivacy");
 
     if (privacy=='gmonly') {
+      // Addressed to the GMs rather than to game.user: a player's draw would otherwise
+      // whisper the result to the player alone. The author sees their own whisper either
+      // way, so the drawing user still gets the message.
       ChatMessage.create({
-       content: myContent, whisper: [game.user.id]
+       content: myContent, whisper: ChatMessage.getWhisperRecipients("GM").map(u => u.id)
       });
     } else {
       ChatMessage.create({ content: myContent });

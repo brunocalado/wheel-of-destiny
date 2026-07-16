@@ -62,13 +62,13 @@ Hooks.once('init', () => {
 }); // END HOOKS
 
 Hooks.on("getSceneControlButtons", function(controls) {
-  if (game.user.isGM) {
-    controls.tokens.tools[`${MODULE_ID}_token_button`] = {
-      icon: "fas fa-yin-yang",
-      name: `${MODULE_ID}_token_button`,
-      title: "☯ Wheel of Destiny",
-      button: true,
-      onChange: (event, active) => { if (active) api.randomToken() }
-    }
+  // Shown to every role: randomToken() gates the non-GM path down to the user's own
+  // targets. The keybindings stay restricted, so the button is the only player entry point.
+  controls.tokens.tools[`${MODULE_ID}_token_button`] = {
+    icon: "fas fa-yin-yang",
+    name: `${MODULE_ID}_token_button`,
+    title: "☯ Wheel of Destiny",
+    button: true,
+    onChange: (event, active) => { if (active) api.randomToken() }
   }
 });
