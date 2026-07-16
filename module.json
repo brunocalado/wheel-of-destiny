@@ -2,17 +2,19 @@
   "id": "wheel-of-destiny",
   "title": "☯ Wheel Of Destiny",
   "description": "Randomly select a token.",
+  
   "authors": [
     {
       "name": "Mestre Digital",
-      "url": "https://www.youtube.com/c/MestreDigital",
+      "url": "http://youtube.com/@mestredigital",
       "flags": {}
     }
   ],
-  "version": "0.3.1",
+  
+  "version": "0.4.0",
   "compatibility": {
-    "minimum": "13",
-    "verified": "13"
+    "minimum": "14",
+    "verified": "14"
   },
 
   "scripts": [],

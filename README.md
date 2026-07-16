@@ -8,6 +8,8 @@ Something bad is about to happen to someone in the room. But, you don't want to 
   <img width="600" src="docs/docs_demo.webp">
 </p>
 
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-Donate-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/mestredigital) [![More Modules](https://img.shields.io/badge/Foundry%20VTT-More%20Modules-red?style=for-the-badge&logo=gamepad)](https://mestredigital.online/pages/projetos-en)
+
 ## Features
 
 - You can select a group of tokens and the module will pick one for you.
@@ -82,8 +84,8 @@ You can see changes at [CHANGELOG](CHANGELOG.md).
 
 ## Licenses
 
-- Code license at [LICENSE](LICENSE.md).
-- Assets license at [LICENSE](LICENSE_ASSETS.md).
+- Code license at [LICENSE](LICENSE).
+- Assets license at [LICENSE](docs/LICENSE_ASSETS.md).
 
 ## Mestre Digital
 
