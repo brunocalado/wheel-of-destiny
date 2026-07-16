@@ -173,33 +173,25 @@ export default class WoD {
   //-----------------------------------------------
   // Show dialog everyone
   async showDialogForEveryone(imagePath, tokenName, dimensions) {
-    const myDialogOptions = {};
-    myDialogOptions['id'] = 'wheel-of-destiny-dialog';
-    myDialogOptions['resizable'] = false;
-
-    if(dimensions.width>500 || dimensions.height>500) {
-      if(dimensions.width>500) {
-        myDialogOptions['width'] = 500;
-        myDialogOptions['height'] = '100%';
-      } else {
-        myDialogOptions['height'] = 500;
-        myDialogOptions['width'] = '100%';
-      }
-    } else {
-      myDialogOptions['width'] = '100%';
-      myDialogOptions['height'] = '100%';
-    }
+    // Remove any existing overlay to avoid duplicates
+    document.getElementById('wod-reveal-overlay')?.remove();
 
     const topMessage = game.settings.get(MODULE_ID, "topMessage");
     const templateData = { imagePath: imagePath, tokenName: tokenName, topMessage: topMessage };
     const myContent = await foundry.applications.handlebars.renderTemplate(`modules/${MODULE_ID}/templates/dialog.hbs`, templateData);
 
-    foundry.applications.api.DialogV2.prompt({
-        window: { title: tokenName },
-        content: myContent,
-        ok: {},
-      }, myDialogOptions
-    );
+    // Build the overlay element
+    const overlay = document.createElement('div');
+    overlay.id = 'wod-reveal-overlay';
+    overlay.innerHTML = myContent;
+
+    // Dismiss on click (only on the image area)
+    overlay.querySelector('.wod-container')?.addEventListener('click', () => overlay.remove());
+
+    document.body.appendChild(overlay);
+
+    // Auto-close after 5 seconds
+    setTimeout(() => overlay.remove(), 3000);
   }
 
   //-----------------------------------------------
