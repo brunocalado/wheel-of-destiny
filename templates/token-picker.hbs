@@ -1,0 +1,83 @@
+{{! Rendered by TokenPickerForm. Filtering is done client-side against the data-*
+    attributes on each row, so the list is built once and never re-rendered.
+
+    Filter state lives on the buttons themselves as aria-pressed rather than in form
+    inputs: the chips toggle freely, each segment group allows exactly one, and both
+    read back the same way. See TokenPickerForm#applyFilters. }}
+<div class="wod-picker-body">
+
+  <header class="wod-picker-bar">
+    <span class="wod-picker-summary" data-summary>0 selected</span>
+    <button type="button" data-action="resetFilters"><i class="fas fa-rotate-left"></i> Reset</button>
+    <button type="button" data-action="selectAll"><i class="fas fa-check-double"></i> All</button>
+    <button type="button" data-action="selectNone"><i class="fas fa-xmark"></i> None</button>
+    <button type="button" class="wod-draw-button" data-action="draw" disabled>
+      <i class="fas fa-yin-yang"></i> Draw
+    </button>
+  </header>
+
+  <section class="wod-filters">
+
+    <span class="wod-filter-label">Actor Type</span>
+    <div class="wod-chips">
+      {{#each actorTypes}}
+      <button type="button" class="wod-chip" aria-pressed="true"
+              data-action="toggleFilter" data-filter="actorType" data-value="{{this.key}}">
+        {{this.label}}<span class="wod-chip-count">{{this.count}}</span>
+      </button>
+      {{/each}}
+    </div>
+
+    <span class="wod-filter-label">Disposition</span>
+    <div class="wod-chips">
+      {{#each dispositions}}
+      <button type="button" class="wod-chip" aria-pressed="true"
+              data-action="toggleFilter" data-filter="disposition" data-value="{{this.value}}">
+        {{this.label}}
+      </button>
+      {{/each}}
+    </div>
+
+    <span class="wod-filter-label">Player Link</span>
+    <div class="wod-segment">
+      <button type="button" aria-pressed="true" data-action="setFilter" data-filter="linked" data-value="any">Any</button>
+      <button type="button" aria-pressed="false" data-action="setFilter" data-filter="linked" data-value="true">Linked</button>
+      <button type="button" aria-pressed="false" data-action="setFilter" data-filter="linked" data-value="false">Unlinked</button>
+    </div>
+
+    <span class="wod-filter-label">Visibility</span>
+    <div class="wod-segment">
+      <button type="button" aria-pressed="true" data-action="setFilter" data-filter="visibility" data-value="any">Any</button>
+      <button type="button" aria-pressed="false" data-action="setFilter" data-filter="visibility" data-value="visible">Visible</button>
+      <button type="button" aria-pressed="false" data-action="setFilter" data-filter="visibility" data-value="hidden">Hidden</button>
+    </div>
+
+  </section>
+
+  <section class="wod-picker-list">
+    {{#each tokens}}
+    <label class="wod-token-row"
+           data-actor-type="{{this.actorType}}"
+           data-disposition="{{this.disposition}}"
+           data-linked="{{this.linked}}"
+           data-hidden="{{this.hidden}}">
+      <input type="checkbox" name="tokenId" value="{{this.id}}">
+      <img class="wod-token-img" src="{{this.img}}" alt="">
+      <span class="wod-token-name">
+        {{this.name}}
+        {{#if this.hidden}}<i class="fas fa-eye-slash wod-token-hidden" data-tooltip="Hidden" inert></i>{{/if}}
+      </span>
+      <span class="wod-token-badges">
+        {{#if this.linked}}
+        <span class="wod-badge wod-badge--user" data-tooltip="{{this.userNames}}">
+          <i class="fas fa-user" inert></i>{{this.userNames}}
+        </span>
+        {{/if}}
+        <span class="wod-badge wod-badge--type">{{this.actorTypeLabel}}</span>
+        <span class="wod-badge wod-badge--{{this.dispositionKey}}">{{this.dispositionLabel}}</span>
+      </span>
+    </label>
+    {{/each}}
+  </section>
+
+</div>

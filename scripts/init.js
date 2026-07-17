@@ -21,7 +21,7 @@ Hooks.once('init', () => {
   // --------------------------------------------------
   // Load API
   api = new WheelOfDestiny();
-  globalThis.WoD = api; // Public macro API: WoD.randomToken(), WoD.customAutoSelectDialog(), ...
+  globalThis.WoD = api; // Public macro API: WoD.randomToken(), WoD.openTokenPicker(), ...
 
   // --------------------------------------------------
   // Functions
@@ -44,10 +44,10 @@ Hooks.once('init', () => {
 
   game.keybindings.register(MODULE_ID, `${MODULE_ID}_keybinding_custom`, {
     name: '☯ Custom Wheel of Destiny',
-    hint: 'This will trigger a dialog with options for the Wheel of Destiny.',
+    hint: 'This always opens the token picker, so you can build the draw pool by hand even when tokens are already selected.',
     editable: [{ key: "KeyF", modifiers: ["Shift"]}],
     onDown: () => {
-      api.customAutoSelectDialog();
+      api.openTokenPicker();
     },
     onUp: () => {},
     restricted: true,  // Restrict this Keybinding to gamemaster only?

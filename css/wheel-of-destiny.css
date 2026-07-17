@@ -7,39 +7,6 @@
  */
 
 .wheel-of-destiny {
-  .wod-titulo {
-    background-color: black;
-    height: 26px;
-    color: beige;
-    font-size: 15px;
-    font-weight: 400;
-    text-align: center;
-    padding-top: 5px;
-  }
-
-  .wod-boxcheck {
-    text-align: center;
-    justify-content: center;
-    margin-left: 5px;
-    font-size: 15px;
-    padding: 10px;
-  }
-
-  .wod-boxcheckpai {
-    background-color: rgba(107, 107, 107, 0.166);
-    height: auto;
-    margin-bottom: 10px;
-  }
-
-  .wod-containerform {
-    display: flex;
-  }
-
-  .wod-containerduo {
-    height: 50%;
-    display: inline-block;
-  }
-
   .wod-container {
     position: relative;
     text-align: center;

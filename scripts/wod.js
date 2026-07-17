@@ -6,6 +6,7 @@
  * it under the terms of the GNU General Public License version 3.
  */
 import { MODULE_ID } from "./constants.js";
+import TokenPickerForm from "./token-picker.js";
 
 export default class WoD {
 
@@ -26,11 +27,18 @@ export default class WoD {
     });
   }
 
-  async randomToken(customTokenList=[], customAutoSelect=null) {
+  /**
+   * Draws one random token and runs the configured animation, chat and dialog for it.
+   *
+   * A GM with fewer than two tokens controlled has not staged a pool, so the token
+   * picker is opened to build one — there is no automatic pool any more.
+   *
+   * @param {Token[]} [customTokenList] An explicit pool, for macros. Bypasses the picker.
+   * @returns {Promise<Token|void>} The drawn token, or nothing if there was nothing to draw.
+   */
+  async randomToken(customTokenList=[]) {
     let tokens = canvas.tokens.controlled; // tokens
-    const allTokens = canvas.tokens.placeables;
 
-    let autoSelectBehavior = game.settings.get(MODULE_ID, "autoSelectBehavior");
     const flagDialog = game.settings.get(MODULE_ID, "hasDialog");
     const flagSound = game.settings.get(MODULE_ID, "playSound");
     const animationMode = game.settings.get(MODULE_ID, "animationMode");
@@ -42,9 +50,9 @@ export default class WoD {
     // Error handling
 
     if (!game.user.isGM) {
-      // Non-GM draws are restricted to the user's own targets. The auto-select behaviors
-      // reach every token in the scene, which is not a player's to draw from, so they are
-      // skipped here — as is customTokenList, which would otherwise let a macro widen the pool.
+      // Non-GM draws are restricted to the user's own targets. The picker reaches every
+      // token in the scene, which is not a player's to draw from, so it is skipped here —
+      // as is customTokenList, which would otherwise let a macro widen the pool.
       tokens = [...game.user.targets]; // Set → Array
       if (tokens.length < 1) {
         ui.notifications.notify( '☯ ' + 'You must target at least one token first.', 'error', {permanent: false});
@@ -52,32 +60,11 @@ export default class WoD {
       }
     } else if (customTokenList.length > 0) {
       tokens = customTokenList;
-    } else {
-      if (tokens.length < 1) { // Auto Select All
-        tokens = allTokens;
-        if (tokens.length < 1) {
-         ui.notifications.notify( '☯ ' + 'There are no tokens available in this scene.', 'info', {permanent: false});
-         return;
-        } else { // Auto Select
-          if (customAutoSelect != null) { autoSelectBehavior = customAutoSelect; }
-          switch(autoSelectBehavior) {
-            case 'pcs':
-              tokens = tokens.filter(e => e.document.hasPlayerOwner===true);
-              break;
-            case 'friendly':
-              tokens = tokens.filter(e => e.document.disposition===1);
-              break;
-            case 'hostile':
-              tokens = tokens.filter(e => e.document.disposition===-1);
-              break;
-          }
-
-          if (tokens.length < 1) {
-           ui.notifications.notify( '☯ ' + 'There are no PC tokens available in this scene.', 'info', {permanent: false});
-           return;
-          }
-        } // END Auto Select
-      }
+    } else if (tokens.length < 2) {
+      // Nothing meaningful to draw between, so the GM builds the pool in the picker.
+      const picked = await this.promptForTokens();
+      if (!picked) return;
+      tokens = picked;
     } // end customTokenList
 
     // --------------------------------------------------
@@ -95,7 +82,9 @@ export default class WoD {
     if (game.settings.get(MODULE_ID, "imageSource")=='tokenart' ) {
       imagePath = selectedToken.document.texture.src;
     } else {
-      imagePath = selectedToken.document.actor.img;
+      // A token whose actor was deleted still draws, and the picker lists it as such —
+      // fall back to the token art rather than throwing on the missing actor.
+      imagePath = selectedToken.document.actor?.img ?? selectedToken.document.texture.src;
     }
 
     // Chat
@@ -379,24 +368,44 @@ export default class WoD {
   }
 
   // --------------------------------------------------
-  //
-  async customAutoSelectDialog() {
-    const templateData = {};
-    const myContent = await foundry.applications.handlebars.renderTemplate(`modules/${MODULE_ID}/templates/dialog-autoselect.hbs`, templateData);
+  // Token Picker
 
-    const data = await foundry.applications.api.DialogV2.prompt({
-      window: { title: "Wheel of Destiny" },
-      content: myContent,
-      ok: {
-        label: "Choose",
-        callback: (event, button) => new foundry.applications.ux.FormDataExtended(button.form).object
-      },
-      rejectClose: false
-    });
+  /**
+   * Asks the GM to build a draw pool out of the tokens in the current scene.
+   *
+   * GM-only by design: the picker lists every token in the scene, which is not a
+   * player's to draw from — players stay on the target-based path in `randomToken`.
+   *
+   * @returns {Promise<Token[]|null>} The chosen pool, or `null` if it was dismissed or
+   *   there was nothing to choose from.
+   */
+  async promptForTokens() {
+    if (!game.user.isGM) {
+      ui.notifications.notify( '☯ ' + 'Only a GM can choose tokens from the scene.', 'error', {permanent: false});
+      return null;
+    }
 
-    if (!data) return;
+    if (canvas.tokens.placeables.length < 1) {
+      ui.notifications.notify( '☯ ' + 'There are no tokens available in this scene.', 'info', {permanent: false});
+      return null;
+    }
 
-    this.randomToken([], data.custom_autoselect);
+    return TokenPickerForm.open();
+  }
+
+  /**
+   * Opens the token picker and draws from whatever the GM commits to.
+   *
+   * Bound to the "Custom Wheel of Destiny" keybinding and published on the `WoD` macro
+   * API. Unlike the toolbar button, this always asks — even when a pool is already
+   * controlled on the canvas.
+   *
+   * @returns {Promise<Token|void>} The drawn token, or nothing if the picker was dismissed.
+   */
+  async openTokenPicker() {
+    const tokens = await this.promptForTokens();
+    if (!tokens) return;
+    return this.randomToken(tokens);
   }
 
 } // END CLASS

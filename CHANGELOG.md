@@ -1,5 +1,22 @@
 # CHANGELOG
 
+## 0.4.3
+
+- **Breaking:** removed the automatic selection mode. A draw with no tokens staged no longer picks a pool on its own — it now asks. The `autoSelectBehavior` setting is gone, along with the "Custom Auto Select" dialog that let you pick a behavior per draw.
+- Added the Choose Tokens picker: a window listing every token in the scene, opened whenever a GM starts a draw with fewer than two tokens selected on the canvas. With two or more selected, the draw still runs directly on that selection, as before.
+- Added four filters to the picker, each detected from the current scene:
+  - **Actor Type** — built from the actor types actually present, so system and module subtypes appear on their own, each with a count.
+  - **Disposition** — Friendly, Neutral, Hostile, Secret.
+  - **Player Link** — whether the token's actor is assigned to a Foundry user.
+  - **Visibility** — Visible or Hidden.
+- The filters are the selection tool, not just a view: the picker opens with the whole scene in the pool, and narrowing a filter drops whatever no longer matches. Filtering to Hostile, for example, deselects everything that is not hostile. Individual tokens can still be unticked by hand to carve out exceptions, until the next filter change re-derives the selection.
+- Every token row shows its art, name, actor type, disposition, the linked user's name, and an icon for hidden tokens.
+- Shift+F now always opens the picker, even when tokens are already selected — that is what distinguishes it from the toolbar button and the plain F keybinding.
+- **Breaking:** `randomToken()` no longer takes a second argument. It was the auto-select override (`randomToken([], 'pcs')`), which no longer has anything to override — macros passing it will have it ignored. The token list argument (`randomToken(tokens)`) is unchanged and still bypasses the picker.
+- **Breaking:** removed `WoD.customAutoSelectDialog()` from the macro API — the dialog it opened no longer exists. Use `WoD.openTokenPicker()` instead, which opens the token picker and draws from whatever you commit to it.
+- Players are unaffected: a non-GM draw is still restricted to the user's own targets and never reaches the scene-wide pool.
+- Fixed a draw on a token whose actor has been deleted throwing an error when Image Source is set to Actor Sheet Art. It now falls back to the token art.
+
 ## 0.4.2
 
 - Redesigned the three settings menus (Audio & Sound, Animation & Visual, Dialogs & Chat) for a professional, high-contrast look.

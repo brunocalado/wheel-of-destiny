@@ -263,22 +263,6 @@ export function registerSettings() {
   // --------------------------------------------------
   // FREE SETTINGS — kept in the main tab for quick access
 
-  // call this with: game.settings.get(MODULE_ID, "autoSelectBehavior")
-  game.settings.register(MODULE_ID, 'autoSelectBehavior', {
-    name: 'Auto Select Behavior',
-    hint: "This define the behavior of the auto selection, which trigger if you don't select any tokens.",
-    scope: "world",
-    type: String,
-    choices: {
-      'all': 'Select All Tokens in the Scene',
-      'pcs': 'Select Only PCs',
-      'friendly': 'Only Friendly Tokens',
-      'hostile': 'Only Hostile Tokens'
-    },
-    default: "all",
-    config: true
-  });
-
   // call this with: game.settings.get(MODULE_ID, "targetToken")
   game.settings.register(MODULE_ID, "targetToken", {
     name: 'Target the Selected Token',

@@ -14,7 +14,8 @@ One click, and the module randomly picks a token: it glows on the canvas, the wh
 
 ## ✨ What It Does
 
-- 🎯 **Picks a random token for you.** Select a few tokens and it draws from those. Select nothing and it draws from the whole scene — or only the PCs, only the friendlies, or only the hostiles. Your call.
+- 🎯 **Picks a random token for you.** Select a few tokens and it draws from those. Select nothing and it opens a picker listing every token in the scene, so you choose exactly who's in the draw.
+- 🔍 **Filters the scene for you.** The picker filters by actor type, disposition, whether a player is linked to the actor, and whether the token is hidden. Click **Hostile** and only the hostiles are in the draw — no hunting through the list.
 - 🎡 **Spins a roulette.** An optional "Native Glow" animation hops from token to token on the canvas before locking onto the winner. No extra modules needed.
 - 🔊 **Plays a random sound.** Point it at a folder of sounds and it picks one at random every spin. Four evil laughs are included to get you started.
 - 💬 **Announces the result in chat.** Keep it as a secret whisper to the GM, or show the whole table who got picked.
@@ -34,26 +35,40 @@ The wheel stops, the winner gets targeted, and the verdict lands in chat — wit
 Three ways to spin:
 
 - **The button.** Open the **Token** controls in the left toolbar and click the ☯ yin-yang button.
-- **The keyboard.** Press **F** to spin, or **Shift+F** to open a quick dialog where you choose who's in the draw this time (everyone / PCs only / friendly / hostile). Both shortcuts are GM-only and can be rebound under **Configure Controls**.
+- **The keyboard.** Press **F** to spin, or **Shift+F** to always open the token picker — even when you already have tokens selected. Both shortcuts are GM-only and can be rebound under **Configure Controls**.
 - **A macro.** See the [Macros & API](#-macros--api) section below.
 
 **Who gets drawn?**
 
 | What you do | Who's in the draw |
 |---|---|
-| You select some tokens first | Only the tokens you selected |
-| You select nothing (GM) | Everyone in the scene — or the group set in **Auto Select Behavior** |
+| You select two or more tokens first | Only the tokens you selected |
+| You select nothing, or just one (GM) | Whoever you pick in the **Choose Tokens** window |
 | You're a player | Only the tokens you have targeted |
+
+### 🎛️ The Choose Tokens window
+
+Start a draw without staging a selection and this opens, listing every token in the scene with its art, name, actor type, disposition, and the player linked to it.
+
+**The filters are how you build the draw.** It opens with the whole scene in, and narrowing a filter drops whatever no longer matches — click **Hostile** and every non-hostile leaves the draw. Four filters, all read from the current scene:
+
+| Filter | What it does |
+|---|---|
+| **Actor Type** | Built from the types actually in the scene, so your system's own types show up with a count each |
+| **Disposition** | Friendly, Neutral, Hostile, Secret |
+| **Player Link** | Whether the token's actor belongs to a Foundry user |
+| **Visibility** | Visible or hidden tokens |
+
+Need an exception? Untick any token by hand. **All** and **None** work on what's currently shown, **Reset** puts every filter back, and **Draw** spins with whatever's left.
 
 ## ⚙️ Settings
 
 <p align="center">
-  <img width="500" src="docs/settings.webp" alt="The module settings tab: three menu buttons plus Auto Select Behavior and Target the Selected Token">
+  <img width="500" src="docs/settings.webp" alt="The module settings tab: three menu buttons plus Target the Selected Token">
 </p>
 
-Two settings sit right in the main module tab, because they're the ones you'll actually change mid-game:
+One setting sits right in the main module tab, because it's the one you'll actually change mid-game:
 
-- **Auto Select Behavior** — who gets drawn when you haven't selected anything: all tokens, only PCs, only friendly, or only hostile.
 - **Target the Selected Token** — automatically target whoever gets picked.
 
 Everything else lives behind three tidy buttons:
@@ -72,10 +87,10 @@ You can trigger the Wheel of Destiny from a macro or from another module:
 WoD.randomToken();
 ```
 
-**Open the dialog that asks who should be in the draw.**
+**Open the token picker, then spin with whatever you choose.** GM only.
 
 ```js
-WoD.customAutoSelectDialog();
+WoD.openTokenPicker();
 ```
 
 **Spin using your own list of tokens.** Runs the full show (animation, sound, chat, reveal) and returns the winner.
@@ -90,7 +105,15 @@ const mySelectedToken = await WoD.randomToken(myTokenList);
 const mySelectedToken = WoD.selectRandomToken(myTokenList);
 ```
 
-> ⚠️ **Coming from an older version?** The API moved from `game.wod` to the global `WoD` in v0.4.0. Old macros using `game.wod.randomToken()` need to be updated to `WoD.randomToken()`.
+**Ask for a list of tokens without spinning.** Opens the picker and hands back what you chose, or `null` if you closed it. GM only.
+
+```js
+const myTokenList = await WoD.promptForTokens();
+```
+
+> ⚠️ **Coming from an older version?**
+> - **v0.4.3** removed the auto-select mode. `WoD.customAutoSelectDialog()` is gone — use `WoD.openTokenPicker()`. `WoD.randomToken()` also lost its second argument: `WoD.randomToken([], 'pcs')` no longer filters, and the `'pcs'` is ignored. Pass your own token list instead, or use the picker's filters.
+> - **v0.4.0** moved the API from `game.wod` to the global `WoD`. Old macros using `game.wod.randomToken()` need to be updated to `WoD.randomToken()`.
 
 ## 📦 Installation
 

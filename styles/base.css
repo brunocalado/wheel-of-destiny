@@ -7,8 +7,8 @@
  */
 
 /* Module-wide custom properties, the toggle switch shared by every checkbox, and the
- * chrome common to the three grouped settings windows. Per-window rules live in
- * styles/settings-<name>.css.
+ * chrome common to the module's windows. Per-window rules live in
+ * styles/settings-<name>.css and styles/token-picker.css.
  *
  * These windows commit to one opaque surface with their own text colors rather than
  * inheriting the core theme: the requirement is zero transparency and maximum
@@ -103,11 +103,14 @@
 }
 
 /* --------------------------------------------------------------------------
- * Grouped settings windows — AudioSettingsForm, AnimationSettingsForm,
- * DialogSettingsForm. Markup: settings-<name>.hbs.
+ * Shared window chrome — AudioSettingsForm, AnimationSettingsForm,
+ * DialogSettingsForm (settings-<name>.hbs) and TokenPickerForm (token-picker.hbs).
+ *
+ * The surface, header and footer buttons are identical across all four; only the
+ * settings-specific field cards below are not shared.
  * -------------------------------------------------------------------------- */
 
-.wheel-of-destiny.wod-settings-form {
+.wheel-of-destiny:is(.wod-settings-form, .wod-token-picker) {
 
   &.application {
     background: var(--wod-surface) !important;
@@ -127,9 +130,9 @@
   }
 
   /* ApplicationV2 puts this class on the same element as core's .window-content
-   * (DEFAULT_OPTIONS.window.contentClasses). Padding lives on .wod-settings-body so
+   * (DEFAULT_OPTIONS.window.contentClasses). Padding lives on the body element so
    * the group dividers can still run edge to edge if a window ever needs them to. */
-  .wod-settings-content {
+  :is(.wod-settings-content, .wod-picker-content) {
     background: var(--wod-surface) !important;
     color: var(--wod-text) !important;
     padding: 0 !important;
@@ -229,7 +232,7 @@
     border-top: 1px solid var(--wod-border);
   }
 
-  .wod-settings-footer button {
+  :is(.wod-settings-footer, .wod-picker-bar) button {
     flex: none;
     background: var(--wod-panel) !important;
     border: 1px solid var(--wod-border) !important;
@@ -237,14 +240,16 @@
     font-weight: 500;
   }
 
-  .wod-settings-footer button[type="submit"] {
+  /* The primary action of each window: submit for the settings forms, the draw itself
+   * for the picker (a plain button — the picker resolves a promise, it has no form). */
+  :is(.wod-settings-footer, .wod-picker-bar) :is(button[type="submit"], .wod-draw-button) {
     background: var(--wod-accent) !important;
     border-color: var(--wod-accent) !important;
     color: var(--wod-on-accent) !important;
     font-weight: 600;
   }
 
-  .wod-settings-footer button[type="submit"]:hover {
+  :is(.wod-settings-footer, .wod-picker-bar) :is(button[type="submit"], .wod-draw-button):hover {
     background: var(--wod-accent-hover) !important;
     border-color: var(--wod-accent-hover) !important;
   }

@@ -1,0 +1,336 @@
+/*!
+ * Wheel Of Destiny
+ * Copyright (c) 2026 https://github.com/brunocalado
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3.
+ */
+
+/* TokenPickerForm — scene token browser. Markup: templates/token-picker.hbs.
+ * The toolbar buttons share their look with the settings windows' footer buttons; that
+ * rule lives in styles/base.css along with the window chrome.
+ *
+ * `!important` follows the same rule as base.css: it appears only where core styles the
+ * same property on the same element (checkbox skin, buttons), never to win against the
+ * module's own rules.
+ */
+
+.wheel-of-destiny.wod-token-picker {
+
+  /*
+   * base.css renders every checkbox in the module as a 2.6rem toggle switch. That reads
+   * well for a handful of settings and badly for one-per-token in a scrollable list, so
+   * the picker takes it back to a compact box.
+   *
+   * `!important` is required rather than preferred: base.css sets these same properties
+   * with `!important` (to beat core's checkbox skin), and specificity alone cannot win
+   * against that. ::before carries the toggle's sliding thumb and is switched off here;
+   * the check mark is drawn on ::after, which base.css blanks with `content: none`.
+   */
+  input[type="checkbox"] {
+    width: 0.95rem !important;
+    height: 0.95rem !important;
+    border-radius: 3px !important;
+    background: var(--wod-input) !important;
+    border: 1px solid var(--wod-border) !important;
+    transition: background-color 0.12s ease, border-color 0.12s ease;
+  }
+
+  input[type="checkbox"]::before {
+    content: none !important;
+  }
+
+  input[type="checkbox"]:checked {
+    background: var(--wod-accent) !important;
+    border-color: var(--wod-accent) !important;
+  }
+
+  input[type="checkbox"]:checked::after {
+    content: "" !important;
+    position: absolute;
+    top: 44%;
+    left: 50%;
+    width: 0.24rem;
+    height: 0.48rem;
+    border: solid var(--wod-on-accent);
+    border-width: 0 2px 2px 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+
+  /* The window has a fixed height, so the body is made to fill it rather than size to
+   * its content — that is what lets the list scroll internally while the toolbar and
+   * filters stay put. `min-height: 0` on both levels overrides the default `auto`
+   * minimum, without which a long list pushes the list's own bottom past the window
+   * instead of scrolling. */
+  .wod-picker-content {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .wod-picker-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  /* --- Toolbar --- */
+
+  .wod-picker-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex: none;
+  }
+
+  .wod-picker-summary {
+    flex: 1;
+    color: var(--wod-text-hint);
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .wod-picker-bar button {
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0.25rem 0.6rem !important;
+    font-size: 0.75rem;
+    line-height: 1.6;
+    white-space: nowrap;
+  }
+
+  .wod-draw-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* --- Filters --- */
+
+  /* Two columns: a label rail that self-sizes, and the controls. Keeps four filters in
+   * four short rows instead of eight tall ones. */
+  .wod-filters {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 0.3rem 0.5rem;
+    flex: none;
+    padding: 0.5rem;
+    border: 1px solid var(--wod-border);
+    border-radius: var(--wod-radius);
+    background: var(--wod-panel);
+  }
+
+  .wod-filter-label {
+    color: var(--wod-text-hint);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .wod-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  /* --- Filter buttons: chips (multi-choice) and segments (single-choice) --- */
+
+  /* Core sizes buttons to a control height meant for form fields, which is far taller
+   * than a filter chip needs — hence the explicit height reset alongside the padding. */
+  .wod-chip,
+  .wod-segment button {
+    flex: none;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0.1rem 0.5rem !important;
+    border: 1px solid var(--wod-border) !important;
+    background: var(--wod-input) !important;
+    color: var(--wod-text) !important;
+    font-size: 0.6875rem;
+    line-height: 1.7;
+    cursor: pointer;
+  }
+
+  .wod-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    border-radius: 999px !important;
+  }
+
+  /* An off chip recedes instead of disappearing, so the set of filters stays readable —
+   * and reads as off without needing a checkbox to say so. */
+  .wod-chip[aria-pressed="false"] {
+    opacity: 0.35;
+  }
+
+  .wod-chip[aria-pressed="true"] {
+    border-color: var(--wod-accent) !important;
+  }
+
+  .wod-chip-count {
+    padding: 0 0.25rem;
+    border-radius: 999px;
+    background: var(--wod-border);
+    color: var(--wod-text-hint);
+    font-size: 0.625rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Segments read as one control: joined, square, with only the active option filled. */
+  .wod-segment {
+    display: flex;
+    width: fit-content;
+  }
+
+  .wod-segment button {
+    border-radius: 0 !important;
+    margin-left: -1px;
+  }
+
+  .wod-segment button:first-child {
+    border-radius: var(--wod-radius) 0 0 var(--wod-radius) !important;
+    margin-left: 0;
+  }
+
+  .wod-segment button:last-child {
+    border-radius: 0 var(--wod-radius) var(--wod-radius) 0 !important;
+  }
+
+  .wod-segment button[aria-pressed="true"] {
+    z-index: 1;
+    background: var(--wod-accent) !important;
+    border-color: var(--wod-accent) !important;
+    color: var(--wod-on-accent) !important;
+    font-weight: 600;
+  }
+
+  /* --- Token list --- */
+
+  .wod-picker-list {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-height: 0;
+    padding: 0.2rem;
+    overflow-y: auto;
+    border: 1px solid var(--wod-border);
+    border-radius: var(--wod-radius);
+    background: var(--wod-input);
+  }
+
+  .wod-token-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex: none;
+    padding: 0.15rem 0.35rem;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .wod-token-row:hover {
+    background: var(--wod-panel);
+    border-color: var(--wod-border);
+  }
+
+  .wod-row--filtered {
+    display: none;
+  }
+
+  .wod-token-img {
+    flex: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 1px solid var(--wod-border);
+    border-radius: 3px;
+    object-fit: cover;
+    background: var(--wod-surface);
+  }
+
+  .wod-token-name {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex: 1;
+    min-width: 0;
+    color: var(--wod-text);
+    font-size: 0.75rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* An unticked row stays legible but stops competing with the pool. */
+  .wod-token-row:not(:has(:checked)) .wod-token-name {
+    color: var(--wod-text-hint);
+  }
+
+  .wod-token-hidden {
+    flex: none;
+    color: var(--wod-text-hint);
+    font-size: 0.625rem;
+  }
+
+  .wod-token-badges {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    flex: none;
+  }
+
+  /* --- Badges --- */
+
+  .wod-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    max-width: 8rem;
+    padding: 0 0.35rem;
+    border: 1px solid var(--wod-border);
+    border-radius: 999px;
+    color: var(--wod-text-hint);
+    font-size: 0.625rem;
+    line-height: 1.7;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Disposition colors are the module's own: core exposes no CSS variable for them. */
+  .wod-badge--friendly {
+    border-color: #3f7d4f;
+    color: #8fd6a2;
+  }
+
+  .wod-badge--hostile {
+    border-color: #8d3b3b;
+    color: #f0a0a0;
+  }
+
+  .wod-badge--neutral {
+    border-color: #6b6f80;
+    color: #c3c7d4;
+  }
+
+  .wod-badge--secret {
+    border-color: #6a4a86;
+    color: #cbaee6;
+  }
+
+  .wod-badge--user {
+    border-color: var(--wod-accent);
+    color: var(--wod-accent);
+  }
+}
