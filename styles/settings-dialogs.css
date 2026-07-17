@@ -6,11 +6,13 @@
  * it under the terms of the GNU General Public License version 3.
  */
 
-/* DialogSettingsForm — styles/settings-dialogs.hbs */
+/* DialogSettingsForm — templates/settings-dialogs.hbs
+ * Window chrome, cards and toggles are shared — see styles/base.css. */
 
-.wheel-of-destiny {
-  /* Free-text announcement line — worth the whole row. */
-  &.wod-settings-form [name="topMessage"] {
-    flex: 1;
+.wheel-of-destiny.wod-settings-form {
+  /* This line is rendered over the result image, so show it in the same weight the
+   * player will read it in rather than as a plain form value. */
+  [name="topMessage"] {
+    font-weight: 600;
   }
 }

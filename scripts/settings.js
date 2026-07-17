@@ -44,7 +44,10 @@ class WodSettingsForm extends HandlebarsApplicationMixin(ApplicationV2) {
       closeOnSubmit: true
     },
     position: { width: 520, height: "auto" },
-    window: { contentClasses: ["standard-form"] }
+    // No `standard-form` content class: it seats each label in a narrow column beside
+    // its control, which wrapped the longer setting names mid-phrase. The templates
+    // lay the fields out themselves — see styles/base.css.
+    window: { contentClasses: ["wod-settings-content"] }
   };
 
   /**
@@ -163,6 +166,37 @@ class AnimationSettingsForm extends WodSettingsForm {
   static PARTS = {
     form: { template: `modules/${MODULE_ID}/templates/settings-animation.hbs` }
   };
+
+  /**
+   * The only window split into tabs: six settings in one column ran it past a
+   * comfortable height, and they already fall into two self-contained groups. The
+   * other two windows hold three settings each and stay single-column.
+   *
+   * Labels are plain text rather than a `labelPrefix`: the module ships no
+   * localization files, so a key prefix would surface the raw key in the nav.
+   * `localize` passes non-keys through unchanged, which is what the template relies on.
+   */
+  static TABS = {
+    primary: {
+      tabs: [
+        { id: "roulette", icon: "fas fa-arrows-spin", label: "Roulette" },
+        { id: "token", icon: "fas fa-crosshairs", label: "Selected Token" }
+      ],
+      initial: "roulette"
+    }
+  };
+
+  /**
+   * Adds the tab state to the shared settings context.
+   * Called from the ApplicationV2 render lifecycle.
+   * @param {object} options
+   * @returns {Promise<object>}
+   */
+  async _prepareContext(options) {
+    const context = await super._prepareContext(options);
+    context.tabs = this._prepareTabs("primary");
+    return context;
+  }
 }
 
 /**
@@ -307,7 +341,7 @@ export function registerSettings() {
 
   // call this with: game.settings.get(MODULE_ID, "animationMode")
   game.settings.register(MODULE_ID, "animationMode", {
-    name: 'Roulette - Animation Mode',
+    name: 'Animation Mode',
     hint: 'Choose an animation for the roulette.',
     scope: 'world',
     config: false,
@@ -321,7 +355,7 @@ export function registerSettings() {
 
   // call this with: game.settings.get(MODULE_ID, "rouletteDelay")
   game.settings.register(MODULE_ID, 'rouletteDelay', {
-    name: 'Roulette - Animation Delay',
+    name: 'Delay Per Step',
     hint: "Delay per token step in the roulette animation. If the total duration would exceed the max total duration, this value is recalculated automatically.",
     scope: 'world',
     config: false,
@@ -336,7 +370,7 @@ export function registerSettings() {
 
   // call this with: game.settings.get(MODULE_ID, "rouletteTotalDuration")
   game.settings.register(MODULE_ID, 'rouletteTotalDuration', {
-    name: 'Roulette - Max Total Duration',
+    name: 'Max Total Duration',
     hint: "Maximum total time (ms) for the roulette animation. If the number of tokens would cause the animation to exceed this limit, the per-step delay is reduced automatically.",
     scope: 'world',
     config: false,

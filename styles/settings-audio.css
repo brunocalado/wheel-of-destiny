@@ -6,17 +6,13 @@
  * it under the terms of the GNU General Public License version 3.
  */
 
-/* AudioSettingsForm — styles/settings-audio.hbs */
+/* AudioSettingsForm — templates/settings-audio.hbs
+ * Window chrome, cards and toggles are shared — see styles/base.css. */
 
-.wheel-of-destiny {
-  /* Preview only tests the folder, it never saves — park it away from the Save
-   * button so the two are not mistaken for each other. */
-  &.wod-settings-form [data-action="previewSound"] {
+.wheel-of-destiny.wod-settings-form {
+  /* Preview only tests the folder, it never saves — park it away from the Save button
+   * so the two are not mistaken for each other. */
+  .wod-settings-footer [data-action="previewSound"] {
     margin-right: auto;
-  }
-
-  /* The folder field should take the row; its browse button is fixed width. */
-  &.wod-settings-form file-picker {
-    flex: 1;
   }
 }

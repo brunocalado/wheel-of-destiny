@@ -6,17 +6,246 @@
  * it under the terms of the GNU General Public License version 3.
  */
 
-/* Module-wide custom properties and the layout shared by the three grouped
- * settings windows. Per-window rules live in styles/settings-<name>.css.
- * Field spacing itself comes from core's `standard-form` content class. */
+/* Module-wide custom properties, the toggle switch shared by every checkbox, and the
+ * chrome common to the three grouped settings windows. Per-window rules live in
+ * styles/settings-<name>.css.
+ *
+ * These windows commit to one opaque surface with their own text colors rather than
+ * inheriting the core theme: the requirement is zero transparency and maximum
+ * legibility, and core's application surface is translucent over a backdrop blur with
+ * no opaque token to rebuild it from.
+ *
+ * `!important` appears only on properties core also sets on the same elements (window
+ * surface, checkbox skin, form controls, buttons) — see the checkbox block for why.
+ */
 
 .wheel-of-destiny {
-  --wod-settings-gap: 0.5rem;
+  --wod-accent: #e8a33d;
+  --wod-accent-hover: #f4b962;
+  --wod-on-accent: #16171d;
+  --wod-surface: #1b1c22;
+  --wod-header: #2b2d38;
+  --wod-panel: #262832;
+  --wod-input: #16171e;
+  --wod-border: #3f4251;
+  --wod-text: #f3f4f7;
+  --wod-text-hint: #c7cad5;
+  --wod-radius: 6px;
+  --wod-gap: 0.5rem;
 
-  &.wod-settings-form .wod-settings-footer {
+  --wod-toggle-width: 2.6rem;
+  --wod-toggle-height: 1.5rem;
+  --wod-toggle-inset: 0.125rem;
+  --wod-toggle-track: #4e5162;
+
+  /*
+   * Apple-style toggle switch, applied to every checkbox in the module.
+   * `!important` on the reset properties is required: Foundry core's own checkbox
+   * skin (foundry2.css, layer elements.forms) applies with higher precedence,
+   * otherwise rendering its native check/border/background on top of this custom
+   * toggle. Its checkmark glyph lives on ::after (ours only redefines ::before for
+   * the sliding thumb), so ::after must be cleared separately or the native check
+   * icon still shows through.
+   */
+  input[type="checkbox"] {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    position: relative;
+    width: var(--wod-toggle-width) !important;
+    height: var(--wod-toggle-height) !important;
+    margin: 0;
+    padding: 0;
+    border: none !important;
+    border-radius: calc(var(--wod-toggle-height) / 2);
+    background: var(--wod-toggle-track) !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    cursor: pointer;
+    vertical-align: middle;
+    flex: none;
+    transition: background-color 0.2s ease;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: var(--wod-toggle-inset);
+      left: var(--wod-toggle-inset);
+      width: calc(var(--wod-toggle-height) - (var(--wod-toggle-inset) * 2));
+      height: calc(var(--wod-toggle-height) - (var(--wod-toggle-inset) * 2));
+      border-radius: 50%;
+      background: #ffffff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+      transition: transform 0.2s ease;
+    }
+
+    &::after {
+      content: none !important;
+    }
+
+    &:checked {
+      background: var(--wod-accent) !important;
+    }
+
+    &:checked::before {
+      transform: translateX(calc(var(--wod-toggle-width) - var(--wod-toggle-height)));
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--wod-accent);
+      outline-offset: 2px;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
+ * Grouped settings windows — AudioSettingsForm, AnimationSettingsForm,
+ * DialogSettingsForm. Markup: settings-<name>.hbs.
+ * -------------------------------------------------------------------------- */
+
+.wheel-of-destiny.wod-settings-form {
+
+  &.application {
+    background: var(--wod-surface) !important;
+    backdrop-filter: none !important;
+    border: 1px solid var(--wod-border);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
+  }
+
+  .window-header {
+    background: var(--wod-header) !important;
+    border-bottom: 1px solid var(--wod-border);
+  }
+
+  .window-title {
+    color: var(--wod-text);
+    font-weight: 600;
+  }
+
+  /* ApplicationV2 puts this class on the same element as core's .window-content
+   * (DEFAULT_OPTIONS.window.contentClasses). Padding lives on .wod-settings-body so
+   * the group dividers can still run edge to edge if a window ever needs them to. */
+  .wod-settings-content {
+    background: var(--wod-surface) !important;
+    color: var(--wod-text) !important;
+    padding: 0 !important;
+  }
+
+  .wod-settings-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    padding: 0.875rem;
+  }
+
+  .wod-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--wod-gap);
+  }
+
+  /* A plain div, not a heading element: core skins h1-h4 with its own font and
+   * spacing, which fights this label. role/aria-level keep it a heading for AT. */
+  .wod-group-title {
     display: flex;
     align-items: center;
-    gap: var(--wod-settings-gap);
-    margin-top: var(--wod-settings-gap);
+    gap: 0.4rem;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid var(--wod-border);
+    color: var(--wod-accent);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+
+  /* One card per setting. The label owns a full row of its own, which is what keeps a
+   * long setting name from wrapping mid-phrase the way core's narrow label column
+   * forced it to. */
+  .wod-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.625rem 0.75rem;
+    border: 1px solid var(--wod-border);
+    border-radius: var(--wod-radius);
+    background: var(--wod-panel);
+  }
+
+  .wod-field-label {
+    color: var(--wod-text);
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .wod-field-hint {
+    margin: 0;
+    color: var(--wod-text-hint);
+    font-size: 0.8125rem;
+    line-height: 1.45;
+  }
+
+  .wod-field-control {
+    display: flex;
+    align-items: center;
+    gap: var(--wod-gap);
+
+    > * {
+      flex: 1;
+    }
+  }
+
+  /* Range inputs are excluded: they carry core's track/thumb skin, which a background
+   * and border of our own would flatten into a plain box. */
+  .wod-field-control :is(input:not([type="range"]), select) {
+    background: var(--wod-input) !important;
+    border: 1px solid var(--wod-border) !important;
+    color: var(--wod-text) !important;
+  }
+
+  /* Boolean settings: the toggle shares the label's row, pushed to the far edge.
+   * Clicking the label flips it — every switch label carries a `for`. */
+  .wod-field--switch .wod-field-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .wod-field--switch .wod-field-label {
+    cursor: pointer;
+  }
+
+  .wod-settings-footer {
+    display: flex;
+    align-items: center;
+    gap: var(--wod-gap);
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--wod-border);
+  }
+
+  .wod-settings-footer button {
+    flex: none;
+    background: var(--wod-panel) !important;
+    border: 1px solid var(--wod-border) !important;
+    color: var(--wod-text) !important;
+    font-weight: 500;
+  }
+
+  .wod-settings-footer button[type="submit"] {
+    background: var(--wod-accent) !important;
+    border-color: var(--wod-accent) !important;
+    color: var(--wod-on-accent) !important;
+    font-weight: 600;
+  }
+
+  .wod-settings-footer button[type="submit"]:hover {
+    background: var(--wod-accent-hover) !important;
+    border-color: var(--wod-accent-hover) !important;
   }
 }

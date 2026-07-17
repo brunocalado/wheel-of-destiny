@@ -1,65 +1,90 @@
 {{! Rendered by AnimationSettingsForm. The root <form> is the Application element itself
-    (DEFAULT_OPTIONS.tag), so this part must not declare a <form> of its own. }}
+    (DEFAULT_OPTIONS.tag), so this part must not declare a <form> of its own.
+
+    Core's form-group markup is deliberately not used: it seats the label in a narrow
+    column beside the control, which wrapped the longer setting names mid-phrase. Here
+    each setting is one .wod-field card whose label owns a full row.
+
+    The `tabs` and `tab` classes are what ApplicationV2#changeTab looks for when it moves
+    the `active` class between the nav links and the sections — the wod-* classes next to
+    them only carry styling. An inactive section is hidden, not disabled, so its fields
+    still reach FormDataExtended and Save writes every setting from either tab. }}
 <div class="wod-settings-body">
 
-  <div class="form-group">
-    <label>{{settings.animationMode.name}}</label>
-    <div class="form-fields">
-      <select name="animationMode">
-        {{selectOptions settings.animationMode.choices selected=settings.animationMode.value}}
-      </select>
-    </div>
-    <p class="hint">{{settings.animationMode.hint}}</p>
-  </div>
+  <nav class="wod-tabs tabs" data-group="primary">
+    {{#each tabs}}
+    <a class="{{this.cssClass}}" data-action="tab" data-group="{{this.group}}" data-tab="{{this.id}}">
+      <i class="{{this.icon}}" inert></i>
+      <span>{{localize this.label}}</span>
+    </a>
+    {{/each}}
+  </nav>
 
-  <div class="form-group">
-    <label>{{settings.rouletteDelay.name}}</label>
-    <div class="form-fields">
-      <range-picker name="rouletteDelay" value="{{settings.rouletteDelay.value}}"
-                    min="{{settings.rouletteDelay.range.min}}"
-                    max="{{settings.rouletteDelay.range.max}}"
-                    step="{{settings.rouletteDelay.range.step}}"></range-picker>
-    </div>
-    <p class="hint">{{settings.rouletteDelay.hint}}</p>
-  </div>
+  <section class="tab wod-tab {{tabs.roulette.cssClass}}" data-group="primary" data-tab="roulette">
 
-  <div class="form-group">
-    <label>{{settings.rouletteTotalDuration.name}}</label>
-    <div class="form-fields">
-      <range-picker name="rouletteTotalDuration" value="{{settings.rouletteTotalDuration.value}}"
-                    min="{{settings.rouletteTotalDuration.range.min}}"
-                    max="{{settings.rouletteTotalDuration.range.max}}"
-                    step="{{settings.rouletteTotalDuration.range.step}}"></range-picker>
+    <div class="wod-field">
+      <label class="wod-field-label" for="wod-animationMode">{{settings.animationMode.name}}</label>
+      <div class="wod-field-control">
+        <select id="wod-animationMode" name="animationMode">
+          {{selectOptions settings.animationMode.choices selected=settings.animationMode.value}}
+        </select>
+      </div>
+      <p class="wod-field-hint">{{settings.animationMode.hint}}</p>
     </div>
-    <p class="hint">{{settings.rouletteTotalDuration.hint}}</p>
-  </div>
 
-
-  <div class="form-group">
-    <label>{{settings.panToToken.name}}</label>
-    <div class="form-fields">
-      <input type="checkbox" name="panToToken" data-dtype="Boolean" {{checked settings.panToToken.value}}>
+    <div class="wod-field">
+      <label class="wod-field-label" for="wod-rouletteDelay">{{settings.rouletteDelay.name}}</label>
+      <div class="wod-field-control">
+        <range-picker id="wod-rouletteDelay" name="rouletteDelay" value="{{settings.rouletteDelay.value}}"
+                      min="{{settings.rouletteDelay.range.min}}"
+                      max="{{settings.rouletteDelay.range.max}}"
+                      step="{{settings.rouletteDelay.range.step}}"></range-picker>
+      </div>
+      <p class="wod-field-hint">{{settings.rouletteDelay.hint}}</p>
     </div>
-    <p class="hint">{{settings.panToToken.hint}}</p>
-  </div>
 
-  <div class="form-group">
-    <label>{{settings.displaySelected.name}}</label>
-    <div class="form-fields">
-      <input type="checkbox" name="displaySelected" data-dtype="Boolean" {{checked settings.displaySelected.value}}>
+    <div class="wod-field">
+      <label class="wod-field-label" for="wod-rouletteTotalDuration">{{settings.rouletteTotalDuration.name}}</label>
+      <div class="wod-field-control">
+        <range-picker id="wod-rouletteTotalDuration" name="rouletteTotalDuration" value="{{settings.rouletteTotalDuration.value}}"
+                      min="{{settings.rouletteTotalDuration.range.min}}"
+                      max="{{settings.rouletteTotalDuration.range.max}}"
+                      step="{{settings.rouletteTotalDuration.range.step}}"></range-picker>
+      </div>
+      <p class="wod-field-hint">{{settings.rouletteTotalDuration.hint}}</p>
     </div>
-    <p class="hint">{{settings.displaySelected.hint}}</p>
-  </div>
 
-  <div class="form-group">
-    <label>{{settings.imageSource.name}}</label>
-    <div class="form-fields">
-      <select name="imageSource">
-        {{selectOptions settings.imageSource.choices selected=settings.imageSource.value}}
-      </select>
+  </section>
+
+  <section class="tab wod-tab {{tabs.token.cssClass}}" data-group="primary" data-tab="token">
+
+    <div class="wod-field wod-field--switch">
+      <div class="wod-field-row">
+        <label class="wod-field-label" for="wod-panToToken">{{settings.panToToken.name}}</label>
+        <input type="checkbox" id="wod-panToToken" name="panToToken" data-dtype="Boolean" {{checked settings.panToToken.value}}>
+      </div>
+      <p class="wod-field-hint">{{settings.panToToken.hint}}</p>
     </div>
-    <p class="hint">{{settings.imageSource.hint}}</p>
-  </div>
+
+    <div class="wod-field wod-field--switch">
+      <div class="wod-field-row">
+        <label class="wod-field-label" for="wod-displaySelected">{{settings.displaySelected.name}}</label>
+        <input type="checkbox" id="wod-displaySelected" name="displaySelected" data-dtype="Boolean" {{checked settings.displaySelected.value}}>
+      </div>
+      <p class="wod-field-hint">{{settings.displaySelected.hint}}</p>
+    </div>
+
+    <div class="wod-field">
+      <label class="wod-field-label" for="wod-imageSource">{{settings.imageSource.name}}</label>
+      <div class="wod-field-control">
+        <select id="wod-imageSource" name="imageSource">
+          {{selectOptions settings.imageSource.choices selected=settings.imageSource.value}}
+        </select>
+      </div>
+      <p class="wod-field-hint">{{settings.imageSource.hint}}</p>
+    </div>
+
+  </section>
 
   <footer class="wod-settings-footer">
     <button type="submit">

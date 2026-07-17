@@ -1,32 +1,45 @@
 {{! Rendered by DialogSettingsForm. The root <form> is the Application element itself
-    (DEFAULT_OPTIONS.tag), so this part must not declare a <form> of its own. }}
+    (DEFAULT_OPTIONS.tag), so this part must not declare a <form> of its own.
+    Card layout rationale: see settings-animation.hbs. }}
 <div class="wod-settings-body">
 
-  <div class="form-group">
-    <label>{{settings.hasDialog.name}}</label>
-    <div class="form-fields">
-      <input type="checkbox" name="hasDialog" data-dtype="Boolean" {{checked settings.hasDialog.value}}>
+  <section class="wod-group">
+    <div class="wod-group-title" role="heading" aria-level="2">
+      <i class="fas fa-window-maximize" inert></i> Result Dialog
     </div>
-    <p class="hint">{{settings.hasDialog.hint}}</p>
-  </div>
 
-  <div class="form-group">
-    <label>{{settings.topMessage.name}}</label>
-    <div class="form-fields">
-      <input type="text" name="topMessage" value="{{settings.topMessage.value}}">
+    <div class="wod-field wod-field--switch">
+      <div class="wod-field-row">
+        <label class="wod-field-label" for="wod-hasDialog">{{settings.hasDialog.name}}</label>
+        <input type="checkbox" id="wod-hasDialog" name="hasDialog" data-dtype="Boolean" {{checked settings.hasDialog.value}}>
+      </div>
+      <p class="wod-field-hint">{{settings.hasDialog.hint}}</p>
     </div>
-    <p class="hint">{{settings.topMessage.hint}}</p>
-  </div>
 
-  <div class="form-group">
-    <label>{{settings.chatMessagePrivacy.name}}</label>
-    <div class="form-fields">
-      <select name="chatMessagePrivacy">
-        {{selectOptions settings.chatMessagePrivacy.choices selected=settings.chatMessagePrivacy.value}}
-      </select>
+    <div class="wod-field">
+      <label class="wod-field-label" for="wod-topMessage">{{settings.topMessage.name}}</label>
+      <div class="wod-field-control">
+        <input type="text" id="wod-topMessage" name="topMessage" value="{{settings.topMessage.value}}">
+      </div>
+      <p class="wod-field-hint">{{settings.topMessage.hint}}</p>
     </div>
-    <p class="hint">{{settings.chatMessagePrivacy.hint}}</p>
-  </div>
+  </section>
+
+  <section class="wod-group">
+    <div class="wod-group-title" role="heading" aria-level="2">
+      <i class="fas fa-comment-dots" inert></i> Chat Message
+    </div>
+
+    <div class="wod-field">
+      <label class="wod-field-label" for="wod-chatMessagePrivacy">{{settings.chatMessagePrivacy.name}}</label>
+      <div class="wod-field-control">
+        <select id="wod-chatMessagePrivacy" name="chatMessagePrivacy">
+          {{selectOptions settings.chatMessagePrivacy.choices selected=settings.chatMessagePrivacy.value}}
+        </select>
+      </div>
+      <p class="wod-field-hint">{{settings.chatMessagePrivacy.hint}}</p>
+    </div>
+  </section>
 
   <footer class="wod-settings-footer">
     <button type="submit">

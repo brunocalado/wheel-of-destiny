@@ -1,32 +1,39 @@
 {{! Rendered by AudioSettingsForm. The root <form> is the Application element itself
-    (DEFAULT_OPTIONS.tag), so this part must not declare a <form> of its own. }}
+    (DEFAULT_OPTIONS.tag), so this part must not declare a <form> of its own.
+    Card layout rationale: see settings-animation.hbs. }}
 <div class="wod-settings-body">
 
-  <div class="form-group">
-    <label>{{settings.playSound.name}}</label>
-    <div class="form-fields">
-      <input type="checkbox" name="playSound" data-dtype="Boolean" {{checked settings.playSound.value}}>
+  <section class="wod-group">
+    <div class="wod-group-title" role="heading" aria-level="2">
+      <i class="fas fa-volume-high" inert></i> Sound Playback
     </div>
-    <p class="hint">{{settings.playSound.hint}}</p>
-  </div>
 
-  <div class="form-group">
-    <label>{{settings.soundPath.name}}</label>
-    <div class="form-fields">
-      <file-picker name="soundPath" type="folder" value="{{settings.soundPath.value}}"></file-picker>
+    <div class="wod-field wod-field--switch">
+      <div class="wod-field-row">
+        <label class="wod-field-label" for="wod-playSound">{{settings.playSound.name}}</label>
+        <input type="checkbox" id="wod-playSound" name="playSound" data-dtype="Boolean" {{checked settings.playSound.value}}>
+      </div>
+      <p class="wod-field-hint">{{settings.playSound.hint}}</p>
     </div>
-    <p class="hint">{{settings.soundPath.hint}}</p>
-  </div>
 
-  <div class="form-group">
-    <label>{{settings.soundChannel.name}}</label>
-    <div class="form-fields">
-      <select name="soundChannel">
-        {{selectOptions settings.soundChannel.choices selected=settings.soundChannel.value}}
-      </select>
+    <div class="wod-field">
+      <label class="wod-field-label" for="wod-soundPath">{{settings.soundPath.name}}</label>
+      <div class="wod-field-control">
+        <file-picker id="wod-soundPath" name="soundPath" type="folder" value="{{settings.soundPath.value}}"></file-picker>
+      </div>
+      <p class="wod-field-hint">{{settings.soundPath.hint}}</p>
     </div>
-    <p class="hint">{{settings.soundChannel.hint}}</p>
-  </div>
+
+    <div class="wod-field">
+      <label class="wod-field-label" for="wod-soundChannel">{{settings.soundChannel.name}}</label>
+      <div class="wod-field-control">
+        <select id="wod-soundChannel" name="soundChannel">
+          {{selectOptions settings.soundChannel.choices selected=settings.soundChannel.value}}
+        </select>
+      </div>
+      <p class="wod-field-hint">{{settings.soundChannel.hint}}</p>
+    </div>
+  </section>
 
   <footer class="wod-settings-footer">
     {{! type="button" keeps the preview out of the submit flow — it plays, it never saves. }}

@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 0.4.2
+
+- Redesigned the three settings menus (Audio & Sound, Animation & Visual, Dialogs & Chat) for a professional, high-contrast look.
+- Replaced every checkbox with an Apple-style toggle switch.
+- Removed the windows' transparency and backdrop blur: the settings menus now render on an opaque surface with their own text colors, so nothing on the canvas shows through.
+- Raised text contrast well past WCAG AA — setting names and hints are now legible instead of dimmed, with the hierarchy between them carried by size and weight rather than faded color.
+- Grouped the settings into labelled sections (Sound Playback, Result Dialog / Chat Message), each setting in its own bordered card, so it is clear which control and hint belong together.
+- Split Animation & Visual into two tabs (Roulette, Selected Token), roughly halving the window's height. The other two menus hold three settings each and stay single-column. Save still writes every setting from either tab.
+- Fixed setting names wrapping mid-phrase in the menu headers: the templates no longer use core's `standard-form` / `form-group` markup, which seated each label in a narrow column beside its control. Labels now own a full row.
+- Renamed three settings that repeated the name of the section they now sit under: `Roulette - Animation Mode` → `Animation Mode`, `Roulette - Animation Delay` → `Delay Per Step`, `Roulette - Max Total Duration` → `Max Total Duration`. Setting keys and stored values are unchanged.
+
 ## 0.4.1
 
 - Added `rouletteTotalDuration` setting (default: 2000ms, range: 500–10000ms) to cap the total time of the Native Glow roulette animation. If the number of tokens would cause the animation to exceed this limit, the per-step delay is automatically recalculated so the full animation stays within the configured duration.

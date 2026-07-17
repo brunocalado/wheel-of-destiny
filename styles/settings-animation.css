@@ -6,12 +6,80 @@
  * it under the terms of the GNU General Public License version 3.
  */
 
-/* AnimationSettingsForm — styles/settings-animation.hbs */
+/* AnimationSettingsForm — templates/settings-animation.hbs
+ * Window chrome, cards and toggles are shared — see styles/base.css. */
 
-.wheel-of-destiny {
-  /* The delay slider ships with a linked number field; give the pair the full row
-   * so the slider stays usable at the window's width. */
-  &.wod-settings-form range-picker {
-    flex: 1;
+.wheel-of-destiny.wod-settings-form {
+
+  /* The module's only tabbed window. Visibility is declared here rather than left to
+   * core's `.tab` rules: core toggles the `active` class, this file decides what the
+   * class looks like. */
+  .wod-tabs {
+    display: flex;
+    gap: 0.25rem;
+    border-bottom: 1px solid var(--wod-border);
+  }
+
+  .wod-tabs a {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-radius: var(--wod-radius) var(--wod-radius) 0 0;
+    color: var(--wod-text-hint);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .wod-tabs a:hover {
+    background: var(--wod-panel);
+    color: var(--wod-text);
+  }
+
+  /* The negative margin drops the active tab over the nav's own bottom border, so it
+   * reads as joined to the panel below instead of floating above a line. */
+  .wod-tabs a.active {
+    margin-bottom: -1px;
+    padding-bottom: calc(0.45rem + 1px);
+    background: var(--wod-panel);
+    border-color: var(--wod-border);
+    color: var(--wod-accent);
+  }
+
+  .wod-tab {
+    display: none;
+  }
+
+  .wod-tab.active {
+    display: flex;
+    flex-direction: column;
+    gap: var(--wod-gap);
+  }
+
+  /* The two sliders are the module's only range-pickers. Their layout is declared
+   * outright because core's own sizing for the pair comes from the `standard-form` /
+   * `.form-fields` context these fields no longer sit in. */
+  range-picker {
+    display: flex;
+    align-items: center;
+    gap: var(--wod-gap);
+  }
+
+  range-picker input[type="range"] {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  /* Fixed basis, not `flex: none`: core sizes this box at `width: 100%`, which an auto
+   * basis resolves to — the box then takes the whole row and collapses the slider.
+   * The floor also keeps the duration's five digits (10000) from clipping. */
+  range-picker input[type="number"] {
+    flex: 0 0 4.5rem;
+    width: 4.5rem;
+    text-align: center;
   }
 }
