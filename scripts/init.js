@@ -32,7 +32,7 @@ Hooks.once('init', () => {
   game.keybindings.register(MODULE_ID, `${MODULE_ID}_keybinding`, {
     name: '☯ Wheel of Destiny',
     hint: 'This will trigger the Wheel of Destiny.',
-    editable: [{ key: "KeyF", modifiers: []}],
+    editable: [],
     onDown: () => {
       api.randomToken();
     },
@@ -45,7 +45,7 @@ Hooks.once('init', () => {
   game.keybindings.register(MODULE_ID, `${MODULE_ID}_keybinding_custom`, {
     name: '☯ Custom Wheel of Destiny',
     hint: 'This always opens the token picker, so you can build the draw pool by hand even when tokens are already selected.',
-    editable: [{ key: "KeyF", modifiers: ["Shift"]}],
+    editable: [],
     onDown: () => {
       api.openTokenPicker();
     },
