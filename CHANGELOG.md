@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 0.4.4
+
+- The Choose Tokens picker now remembers its filters, window position, and window size per client between openings. If the remembered filters would leave nothing to select in the current scene, they reset to their defaults instead of opening onto an empty pool.
+- Canvas and picker selection now mirror each other while the picker is open: controlling or releasing a token on the canvas (click, shift+click, rubber-band select) adds or drops it from the pool, widening only whichever filter(s) were hiding it rather than re-deriving the whole selection — the same way ticking a row controls or releases the matching token on the canvas. Whatever was controlled on the canvas before the picker opened is restored once it closes, so this never leaks into `WoD.randomToken()`'s own use of the canvas selection.
+- Added a locate button to each row in the picker: pings and pans every connected view to that token.
+- Added a help icon to the picker's toolbar, explaining that shift+click — not a plain click — adds or removes one token from the canvas selection without losing the rest.
+- Disposition badges in the picker now show an emoji (🙂 Friendly, 😐 Neutral, 😠 Hostile, 🎭 Secret) instead of text; the player-link badge is now icon-only. Both still show the full name on hover.
+- Selected rows in the picker now get a subtle background and border highlight, in addition to the checkbox.
+- Narrowed the picker's default window width (540px → 420px).
+- Fixed `ChatMessage.create()` omitting `rolls`, which crashed draw results under systems (e.g. Daggerheart) whose `ChatMessage` document-class override reads `source.rolls.length` during document creation without guarding for it being absent.
+
 ## 0.4.3
 
 - **Breaking:** removed the automatic selection mode. A draw with no tokens staged no longer picks a pool on its own — it now asks. The `autoSelectBehavior` setting is gone, along with the "Custom Auto Select" dialog that let you pick a behavior per draw.

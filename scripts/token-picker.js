@@ -6,6 +6,7 @@
  * it under the terms of the GNU General Public License version 3.
  */
 import { MODULE_ID } from "./constants.js";
+import { pingToken } from "./helpers.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -25,6 +26,20 @@ const NO_ACTOR_TYPE = "__none__";
  * list shows. Individual rows can then be unticked by hand to carve out exceptions —
  * until the next filter change, which re-derives the whole selection.
  *
+ * Filter state is remembered per client (see `#saveFilterState`/`#restoreFilterState`),
+ * so reopening the picker starts from wherever it was last left — unless that state
+ * would open onto an empty pool, in which case `_onRender` falls back to the defaults.
+ *
+ * Canvas selection and the row list mirror each other for as long as the picker stays
+ * open: every pool change controls or releases the matching tokens (`#syncCanvasSelection`),
+ * so the GM can see and shift-click the pool on the map, not just in the list; and
+ * controlling or releasing a token directly on the canvas mirrors back into its row
+ * (`#onControlToken`), widening only the filters that were hiding it rather than running a
+ * full filter re-derivation — otherwise every other row the widened filter matches would
+ * get swept into the pool too. Whatever was controlled before the picker opened is
+ * restored on close, so this takeover never leaks into `WoD.randomToken()`'s own use of
+ * `canvas.tokens.controlled`.
+ *
  * `BASE_APPLICATION` is deliberately left alone: this is a leaf class, so ApplicationV2
  * must stay the floor of the DEFAULT_OPTIONS merge chain.
  */
@@ -40,6 +55,36 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
   #settled = false;
 
   /**
+   * The `controlToken` hook callback, bound to this instance and kept so it can be
+   * removed again on close — an unremoved hook would keep firing into a dead app.
+   * @type {?function(Token, boolean): void}
+   */
+  #controlTokenHook = null;
+
+  /**
+   * Whatever was controlled on canvas before the picker took over selection, so `_onClose`
+   * can hand it back exactly as found. Without this, whatever the picker was showing as
+   * the pool at the moment it closed would linger as the canvas selection and quietly
+   * become the pool for the next quick draw — `WoD.randomToken()` reads
+   * `canvas.tokens.controlled` directly when it is not given an explicit list.
+   * @type {Set<string>}
+   */
+  #initialControlledIds = new Set();
+
+  /**
+   * True while `#syncCanvasSelection` is itself (de)controlling tokens, so the
+   * `controlToken` hooks that provokes are not mistaken for the GM's own canvas click.
+   */
+  #syncingCanvas = false;
+
+  /**
+   * Debounce handle for `#savePosition` — dragging and resizing call `setPosition`
+   * continuously, and only where it comes to rest is worth writing to the client.
+   * @type {?number}
+   */
+  #savePositionTimeout = null;
+
+  /**
    * The window currently on screen, if any. DEFAULT_OPTIONS pins a fixed `id`, so a
    * second instance would fight the first over the same element.
    * @type {?TokenPickerForm}
@@ -49,7 +94,11 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
   static DEFAULT_OPTIONS = {
     id: "wod-token-picker",
     classes: [MODULE_ID, "wod-token-picker"],
-    position: { width: 540, height: 560 },
+    // Narrower than a first guess would land on: badges and names already truncate with
+    // an ellipsis, so the list stays readable while leaving more of the canvas visible
+    // behind it. Only a starting point — `open()` overrides it with whatever the client
+    // last resized the window to, once one has been remembered.
+    position: { width: 420, height: 560 },
     window: {
       title: "Choose Tokens — Wheel of Destiny",
       icon: "fas fa-yin-yang",
@@ -62,7 +111,8 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
       selectNone: this.prototype._onSelectNone,
       resetFilters: this.prototype._onResetFilters,
       toggleFilter: this.prototype._onToggleFilter,
-      setFilter: this.prototype._onSetFilter
+      setFilter: this.prototype._onSetFilter,
+      locateToken: this.prototype._onLocateToken
     }
   };
 
@@ -86,8 +136,13 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
       return null;
     }
 
+    // Overrides DEFAULT_OPTIONS.position with wherever this client last left the window,
+    // if anywhere — the constructor merges this over the class default the same way any
+    // caller's options would.
+    const position = game.settings.get(MODULE_ID, "tokenPickerPosition");
+
     return new Promise(resolve => {
-      const app = new this();
+      const app = new this(position ? { position } : {});
       TokenPickerForm.#current = app;
       app.#resolve = resolve;
       app.render({ force: true }).catch(err => {
@@ -123,11 +178,13 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
   async _prepareContext(options) {
     // Plain English labels: the module ships no localization files, and core's
     // disposition i18n keys are not stable enough across builds to rely on.
+    // The row badge shows `emoji` instead of `label` — computed here rather than with a
+    // Handlebars comparison helper in the template, so the template stays a plain lookup.
     const dispositions = [
-      { value: CONST.TOKEN_DISPOSITIONS.FRIENDLY, key: "friendly", label: "Friendly" },
-      { value: CONST.TOKEN_DISPOSITIONS.NEUTRAL,  key: "neutral",  label: "Neutral" },
-      { value: CONST.TOKEN_DISPOSITIONS.HOSTILE,  key: "hostile",  label: "Hostile" },
-      { value: CONST.TOKEN_DISPOSITIONS.SECRET,   key: "secret",   label: "Secret" }
+      { value: CONST.TOKEN_DISPOSITIONS.FRIENDLY, key: "friendly", label: "Friendly", emoji: "🙂" },
+      { value: CONST.TOKEN_DISPOSITIONS.NEUTRAL,  key: "neutral",  label: "Neutral",  emoji: "😐" },
+      { value: CONST.TOKEN_DISPOSITIONS.HOSTILE,  key: "hostile",  label: "Hostile",  emoji: "😠" },
+      { value: CONST.TOKEN_DISPOSITIONS.SECRET,   key: "secret",   label: "Secret",   emoji: "🎭" }
     ];
     const dispositionByValue = new Map(dispositions.map(d => [d.value, d]));
 
@@ -160,6 +217,7 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
         disposition: token.document.disposition,
         dispositionKey: disposition?.key ?? "neutral",
         dispositionLabel: disposition?.label ?? "Unknown",
+        dispositionEmoji: disposition?.emoji ?? "❓",
         linked: userNames.length > 0,
         userNames: userNames.join(", "),
         hidden: token.document.hidden === true
@@ -174,8 +232,9 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
   }
 
   /**
-   * Wires the row checkboxes. A tick is not a click on a `[data-action]` element, so it
-   * cannot go through `DEFAULT_OPTIONS.actions` — the filter buttons can, and do.
+   * Wires the row checkboxes and the live canvas-selection sync. A tick is not a click
+   * on a `[data-action]` element, so it cannot go through `DEFAULT_OPTIONS.actions` — the
+   * filter buttons can, and do.
    *
    * Bound here rather than in `_onRender` because ApplicationV2 keeps the root element
    * across re-renders and only swaps the part contents — re-binding per render would
@@ -190,11 +249,22 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
     this.element.addEventListener("change", event => {
       if (event.target.matches("input[name='tokenId']")) this.#updateSummary();
     });
+
+    // Captured before anything below can change canvas selection, so `_onClose` has an
+    // accurate "before" state to restore.
+    this.#initialControlledIds = new Set(canvas.tokens.controlled.map(token => token.id));
+
+    // Left-clicking (or shift-clicking, or rubber-band-selecting) a token on the canvas
+    // while the picker is open should register the same way ticking its row would.
+    this.#controlTokenHook = (token, controlled) => this.#onControlToken(token, controlled);
+    Hooks.on("controlToken", this.#controlTokenHook);
   }
 
   /**
-   * Seeds the selection from the opening filter state — which is "everything", so the
-   * picker opens with the whole scene in the pool.
+   * Restores the filter state remembered from the last time the picker was open, then
+   * derives the selection from it. If that state matches nothing in this scene — e.g. it
+   * was narrowed down for a different scene's tokens — it is useless as a starting point,
+   * so the filters fall back to their defaults instead of opening onto an empty pool.
    * Called from the ApplicationV2 render lifecycle.
    * @param {object} context
    * @param {object} options
@@ -202,7 +272,37 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
    */
   _onRender(context, options) {
     super._onRender(context, options);
+    this.#restoreFilterState();
     this.#applyFilters();
+
+    if (this.#selectedInputs().length === 0) {
+      ui.notifications.warn("☯ " + "The saved filters matched no tokens in this scene — filters were reset.");
+      this._onResetFilters();
+    }
+  }
+
+  /**
+   * Remembers where the window ends up, so the next `open()` can restore it. Every drag,
+   * resize and programmatic move already passes through core's `setPosition` — overriding
+   * it is the one place that catches all three without guessing at a more specific,
+   * possibly-internal hook for "the user let go of the title bar".
+   * @param {object} [position]
+   * @returns {object}
+   */
+  setPosition(position) {
+    const applied = super.setPosition(position);
+    clearTimeout(this.#savePositionTimeout);
+    this.#savePositionTimeout = setTimeout(() => this.#savePosition(), 400);
+    return applied;
+  }
+
+  /**
+   * Writes the current position/size to the client setting.
+   * @returns {void}
+   */
+  #savePosition() {
+    const { top, left, width, height } = this.position;
+    game.settings.set(MODULE_ID, "tokenPickerPosition", { top, left, width, height });
   }
 
   /**
@@ -224,6 +324,16 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
    */
   _onClose(options) {
     super._onClose(options);
+    // Flushes rather than drops a pending debounce, so closing right after a drag still
+    // remembers where the window was left instead of whatever it opened at.
+    clearTimeout(this.#savePositionTimeout);
+    this.#savePosition();
+    if (this.#controlTokenHook) {
+      Hooks.off("controlToken", this.#controlTokenHook);
+      this.#controlTokenHook = null;
+    }
+    // The hook is already off, so this cannot loop back through #onControlToken.
+    this.#restoreCanvasSelection();
     TokenPickerForm.#current = null;
     this.#settle(null);
   }
@@ -241,10 +351,12 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
   }
 
   /**
-   * Shows the rows matching every active filter and makes them the selection.
-   * @returns {void}
+   * Builds a "does this row's dataset pass the active filters" test from whatever the
+   * filter buttons are currently pressed to. Shared by `#applyFilters` (which also drives
+   * the selection) and `#refreshRowVisibility` (which only drives what's shown).
+   * @returns {function(DOMStringMap): boolean}
    */
-  #applyFilters() {
+  #buildFilterPredicate() {
     const pressedValues = filter => new Set([...this.element.querySelectorAll(
       `[data-filter="${filter}"][aria-pressed="true"]`
     )].map(button => button.dataset.value));
@@ -255,29 +367,217 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
     const [linked = "any"] = pressedValues("linked");
     const [visibility = "any"] = pressedValues("visibility");
 
-    for (const row of this.element.querySelectorAll(".wod-token-row")) {
-      const data = row.dataset;
-      const show = types.has(data.actorType)
-        && dispositions.has(data.disposition)
-        && (linked === "any" || data.linked === linked)
-        && (visibility === "any" || data.hidden === String(visibility === "hidden"));
+    return data => types.has(data.actorType)
+      && dispositions.has(data.disposition)
+      && (linked === "any" || data.linked === linked)
+      && (visibility === "any" || data.hidden === String(visibility === "hidden"));
+  }
 
+  /**
+   * Shows the rows matching every active filter and makes them the selection, then
+   * remembers this filter state for the next time the picker opens.
+   * @returns {void}
+   */
+  #applyFilters() {
+    const matches = this.#buildFilterPredicate();
+
+    for (const row of this.element.querySelectorAll(".wod-token-row")) {
+      const show = matches(row.dataset);
       row.classList.toggle("wod-row--filtered", !show);
       // The filters drive the pool: what survives them is in, what does not is out.
       row.querySelector("input[name='tokenId']").checked = show;
     }
 
     this.#updateSummary();
+    this.#saveFilterState();
   }
 
   /**
-   * Refreshes the pool count and the Draw button's enabled state.
+   * Re-hides or reveals rows against the active filters without touching any checkbox.
+   * Used when a filter is widened just enough to admit one manually-controlled token —
+   * other rows the wider filter now matches should become visible again, but must not be
+   * swept into the selection the way a normal filter change would sweep them in.
+   * @returns {void}
+   */
+  #refreshRowVisibility() {
+    const matches = this.#buildFilterPredicate();
+    for (const row of this.element.querySelectorAll(".wod-token-row")) {
+      row.classList.toggle("wod-row--filtered", !matches(row.dataset));
+    }
+  }
+
+  /**
+   * Refreshes the pool count and the Draw button's enabled state, then makes the canvas
+   * selection match — every path that can change the pool (filter changes, All/None, a
+   * manual tick, a canvas click) already funnels through here, so this is the one place
+   * that needs to keep the map in sync with it.
    * @returns {void}
    */
   #updateSummary() {
     const selected = this.#selectedInputs().length;
     this.element.querySelector("[data-summary]").textContent = `${selected} selected`;
     this.element.querySelector("[data-action='draw']").disabled = selected < 1;
+    this.#syncCanvasSelection();
+  }
+
+  /**
+   * Controls every token whose row is ticked and releases every token whose row is not,
+   * so the pool the picker describes is also what lights up on the map — the GM can then
+   * shift off a token there just as naturally as unticking its row here.
+   * @returns {void}
+   */
+  #syncCanvasSelection() {
+    const selectedIds = new Set(this.#selectedInputs().map(input => input.value));
+
+    this.#syncingCanvas = true;
+    try {
+      for (const token of canvas.tokens.placeables) {
+        const shouldControl = selectedIds.has(token.id);
+        if (token.controlled === shouldControl) continue;
+        if (shouldControl) token.control({ releaseOthers: false });
+        else token.release();
+      }
+    } finally {
+      this.#syncingCanvas = false;
+    }
+  }
+
+  /**
+   * Hands canvas selection back to whatever it was before the picker opened.
+   * @returns {void}
+   */
+  #restoreCanvasSelection() {
+    for (const token of canvas.tokens.placeables) {
+      const shouldControl = this.#initialControlledIds.has(token.id);
+      if (token.controlled === shouldControl) continue;
+      if (shouldControl) token.control({ releaseOthers: false });
+      else token.release();
+    }
+  }
+
+  /**
+   * Reads the client's remembered filter state. Multi-choice filters store the buttons
+   * that are *off* rather than the ones that are on, so an actor type or disposition this
+   * scene has never seen before defaults to on, same as a first-ever open of the picker.
+   * @returns {{actorTypeOff: string[], dispositionOff: string[], linked: string, visibility: string}}
+   */
+  #readFilterState() {
+    const stored = game.settings.get(MODULE_ID, "tokenPickerFilters");
+    return {
+      actorTypeOff: stored?.actorTypeOff ?? [],
+      dispositionOff: stored?.dispositionOff ?? [],
+      linked: stored?.linked ?? "any",
+      visibility: stored?.visibility ?? "any"
+    };
+  }
+
+  /**
+   * Applies the remembered filter state to the filter buttons. Called before the first
+   * `#applyFilters` of a render, so the picker opens already narrowed the way it was left.
+   * @returns {void}
+   */
+  #restoreFilterState() {
+    const state = this.#readFilterState();
+
+    for (const chip of this.element.querySelectorAll('[data-filter="actorType"]')) {
+      chip.setAttribute("aria-pressed", String(!state.actorTypeOff.includes(chip.dataset.value)));
+    }
+    for (const chip of this.element.querySelectorAll('[data-filter="disposition"]')) {
+      chip.setAttribute("aria-pressed", String(!state.dispositionOff.includes(chip.dataset.value)));
+    }
+    for (const button of this.element.querySelectorAll('.wod-segment [data-filter="linked"]')) {
+      button.setAttribute("aria-pressed", String(button.dataset.value === state.linked));
+    }
+    for (const button of this.element.querySelectorAll('.wod-segment [data-filter="visibility"]')) {
+      button.setAttribute("aria-pressed", String(button.dataset.value === state.visibility));
+    }
+  }
+
+  /**
+   * Writes the filter buttons' current state to the client setting.
+   * @returns {void}
+   */
+  #saveFilterState() {
+    const off = filter => [...this.element.querySelectorAll(
+      `[data-filter="${filter}"][aria-pressed="false"]`
+    )].map(chip => chip.dataset.value);
+
+    const pressedValue = filter => this.element.querySelector(
+      `[data-filter="${filter}"][aria-pressed="true"]`
+    )?.dataset.value ?? "any";
+
+    game.settings.set(MODULE_ID, "tokenPickerFilters", {
+      actorTypeOff: off("actorType"),
+      dispositionOff: off("disposition"),
+      linked: pressedValue("linked"),
+      visibility: pressedValue("visibility")
+    });
+  }
+
+  /**
+   * Mirrors native canvas token control into the picker: controlling a token joins the
+   * pool, releasing control drops it. Registered as a `controlToken` hook while open.
+   * @param {Token} token
+   * @param {boolean} controlled
+   * @returns {void}
+   */
+  #onControlToken(token, controlled) {
+    // Our own #syncCanvasSelection provoked this, not a click — ignore it, or every sync
+    // would loop straight back into another one.
+    if (this.#syncingCanvas) return;
+
+    const input = this.element.querySelector(`input[name="tokenId"][value="${token.id}"]`);
+    if (!input) return;
+
+    if (controlled) {
+      const row = input.closest(".wod-token-row");
+      if (row.classList.contains("wod-row--filtered")) this.#widenFiltersFor(row);
+      input.checked = true;
+    } else {
+      input.checked = false;
+    }
+
+    this.#updateSummary();
+  }
+
+  /**
+   * Opens exactly the filters hiding one row, so a manually-controlled token can join the
+   * pool without pulling every other row that a filter change would otherwise admit —
+   * those become visible again (the chip really is "on" now) but stay unticked.
+   * @param {HTMLElement} row
+   * @returns {void}
+   */
+  #widenFiltersFor(row) {
+    const data = row.dataset;
+
+    this.element.querySelector(
+      `[data-filter="actorType"][data-value="${data.actorType}"]`
+    )?.setAttribute("aria-pressed", "true");
+
+    this.element.querySelector(
+      `[data-filter="disposition"][data-value="${data.disposition}"]`
+    )?.setAttribute("aria-pressed", "true");
+
+    this.#releaseSegmentIfBlocking("linked", data.linked);
+    this.#releaseSegmentIfBlocking("visibility", data.hidden === "true" ? "hidden" : "visible");
+
+    this.#refreshRowVisibility();
+    this.#saveFilterState();
+  }
+
+  /**
+   * Moves a single-choice segment back to "any" if, and only if, its current choice would
+   * hide a row whose own value is `value`.
+   * @param {string} filter
+   * @param {string} value
+   * @returns {void}
+   */
+  #releaseSegmentIfBlocking(filter, value) {
+    const pressed = this.element.querySelector(`[data-filter="${filter}"][aria-pressed="true"]`);
+    if (!pressed || pressed.dataset.value === "any" || pressed.dataset.value === value) return;
+    for (const button of pressed.closest(".wod-segment").querySelectorAll("button")) {
+      button.setAttribute("aria-pressed", String(button.dataset.value === "any"));
+    }
   }
 
   /**
@@ -374,5 +674,19 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
    */
   _onSelectNone(event, target) {
     this.#setVisibleSelection(false);
+  }
+
+  /**
+   * Pings and pulls every connected view to one row's token, so the GM can find it on the
+   * map without hunting. Registered as the `locateToken` action; lives on a button nested
+   * inside the row's `<label>`, so it does not also toggle that row's checkbox.
+   * @param {PointerEvent} event
+   * @param {HTMLElement} target
+   * @returns {void}
+   */
+  _onLocateToken(event, target) {
+    const token = canvas.tokens.get(target.dataset.tokenId);
+    if (!token) return;
+    pingToken(token);
   }
 }

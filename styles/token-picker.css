@@ -97,6 +97,26 @@
     white-space: nowrap;
   }
 
+  /* A genuine square, unlike the chips' pills and the badges' rounded ends — it reads as
+   * a distinct "info" affordance rather than another filter control. Sized to match its
+   * neighbor buttons' rendered height exactly rather than a guessed px value: same
+   * line-height (0.75rem font × 1.6) plus their 0.25rem top/bottom padding and 1px
+   * top/bottom border, with width set equal so it stays square instead of following
+   * their wider horizontal padding. */
+  .wod-help-icon {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: calc(0.75rem * 1.6 + 0.5rem + 2px);
+    height: calc(0.75rem * 1.6 + 0.5rem + 2px);
+    border: 1px solid var(--wod-border);
+    border-radius: 3px;
+    color: var(--wod-text-hint);
+    font-size: 0.6875rem;
+    cursor: help;
+  }
+
   .wod-picker-bar button {
     height: auto !important;
     min-height: 0 !important;
@@ -245,6 +265,22 @@
     border-color: var(--wod-border);
   }
 
+  /* The checkbox alone was too easy to miss at a glance — this repeats "in the pool" as
+   * a faint fill and a soft border, the same accent used everywhere else for "active" but
+   * translucent throughout (rgba, not var(): --wod-accent is an opaque hex custom
+   * property) so it reads as a hint rather than competing with the badges for attention. */
+  .wod-token-row:has(:checked) {
+    background: rgba(232, 163, 61, 0.06);
+    border-color: rgba(232, 163, 61, 0.4);
+  }
+
+  /* Specificity beats source order here on purpose, so hovering a checked row brightens
+   * it instead of `:hover`'s plain panel background silently hiding the checked look. */
+  .wod-token-row:has(:checked):hover {
+    background: rgba(232, 163, 61, 0.1);
+    border-color: rgba(232, 163, 61, 0.55);
+  }
+
   .wod-row--filtered {
     display: none;
   }
@@ -290,6 +326,33 @@
     flex: none;
   }
 
+  /* Nested inside the row's <label> — clicking it fires its own `data-action` instead of
+   * the row's checkbox because the checkbox, not this button, is the label's associated
+   * control (it comes first in the markup). Bordered and filled like a real button — an
+   * icon alone on a hover-only background read as unclickable decoration. */
+  .wod-token-locate {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    border: 1px solid var(--wod-border) !important;
+    border-radius: 3px !important;
+    background: var(--wod-input) !important;
+    color: var(--wod-text-hint) !important;
+    font-size: 0.6875rem;
+    cursor: pointer;
+  }
+
+  .wod-token-locate:hover {
+    border-color: var(--wod-accent) !important;
+    background: var(--wod-panel) !important;
+    color: var(--wod-accent) !important;
+  }
+
   /* --- Badges --- */
 
   .wod-badge {
@@ -332,5 +395,15 @@
   .wod-badge--user {
     border-color: var(--wod-accent);
     color: var(--wod-accent);
+  }
+
+  /* These four carry a single glyph rather than a text label, so the base badge
+   * font-size (sized for text like the actor-type badge) reads too small for them. */
+  .wod-badge--friendly,
+  .wod-badge--neutral,
+  .wod-badge--hostile,
+  .wod-badge--secret,
+  .wod-badge--user {
+    font-size: 0.8125rem;
   }
 }

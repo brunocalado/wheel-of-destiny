@@ -16,6 +16,7 @@ One click, and the module randomly picks a token: it glows on the canvas, the wh
 
 - 🎯 **Picks a random token for you.** Select a few tokens and it draws from those. Select nothing and it opens a picker listing every token in the scene, so you choose exactly who's in the draw.
 - 🔍 **Filters the scene for you.** The picker filters by actor type, disposition, whether a player is linked to the actor, and whether the token is hidden. Click **Hostile** and only the hostiles are in the draw — no hunting through the list.
+- 🖱️ **Or just click tokens on the map.** While the picker's open, canvas and list stay in sync — control a token to add it to the draw, release it to drop it, and the filters widen automatically to let it in.
 - 🎡 **Spins a roulette.** An optional "Native Glow" animation hops from token to token on the canvas before locking onto the winner. No extra modules needed.
 - 🔊 **Plays a random sound.** Point it at a folder of sounds and it picks one at random every spin. Four evil laughs are included to get you started.
 - 💬 **Announces the result in chat.** Keep it as a secret whisper to the GM, or show the whole table who got picked.
@@ -48,18 +49,24 @@ Three ways to spin:
 
 ### 🎛️ The Choose Tokens window
 
-Start a draw without staging a selection and this opens, listing every token in the scene with its art, name, actor type, disposition, and the player linked to it.
+Start a draw without staging a selection and this opens, listing every token in the scene with its art, name, actor type, disposition, and the player linked to it. It reopens wherever you last left it — position, size, and filters included.
+
+<p align="center">
+  <img width="700" src="docs/choose-tokens.webp" alt="The Choose Tokens window open beside the canvas, with the checked rows highlighted on their matching tokens">
+</p>
 
 **The filters are how you build the draw.** It opens with the whole scene in, and narrowing a filter drops whatever no longer matches — click **Hostile** and every non-hostile leaves the draw. Four filters, all read from the current scene:
 
 | Filter | What it does |
 |---|---|
 | **Actor Type** | Built from the types actually in the scene, so your system's own types show up with a count each |
-| **Disposition** | Friendly, Neutral, Hostile, Secret |
+| **Disposition** | Friendly 🙂, Neutral 😐, Hostile 😠, Secret 🎭 |
 | **Player Link** | Whether the token's actor belongs to a Foundry user |
 | **Visibility** | Visible or hidden tokens |
 
-Need an exception? Untick any token by hand. **All** and **None** work on what's currently shown, **Reset** puts every filter back, and **Draw** spins with whatever's left.
+If your remembered filters would leave nothing to pick from in the current scene, they reset to their defaults instead of opening onto an empty draw.
+
+Need an exception? Untick any token by hand — or click it right on the canvas. While the window is open, canvas and picker selection track each other: controlling a token on the map ticks its row, widening whatever filter was hiding it if needed, and releasing it unticks the row again. Shift+click adds or removes a token without losing the rest of your canvas selection; a plain click replaces it, same as it always has. Each row also has a 🔍 button to pan the camera straight to that token. **All** and **None** work on what's currently shown, **Reset** puts every filter back, and **Draw** spins with whatever's left.
 
 ## ⚙️ Settings
 

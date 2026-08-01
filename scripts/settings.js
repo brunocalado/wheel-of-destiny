@@ -438,4 +438,27 @@ export function registerSettings() {
     default: "gmonly",
     config: false
   });
+
+  // --------------------------------------------------
+  // TOKEN PICKER — internal state, never surfaced in a menu
+
+  // call this with: game.settings.get(MODULE_ID, "tokenPickerFilters")
+  // Remembers the Choose Tokens filter state per client, so reopening the picker
+  // restores whatever it was last narrowed down to instead of starting over.
+  game.settings.register(MODULE_ID, "tokenPickerFilters", {
+    scope: 'client',
+    config: false,
+    type: Object,
+    default: null
+  });
+
+  // call this with: game.settings.get(MODULE_ID, "tokenPickerPosition")
+  // Remembers the Choose Tokens window's position/size per client, so it reopens where
+  // it was last left instead of re-centering on screen every time.
+  game.settings.register(MODULE_ID, "tokenPickerPosition", {
+    scope: 'client',
+    config: false,
+    type: Object,
+    default: null
+  });
 }

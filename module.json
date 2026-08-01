@@ -2,7 +2,6 @@
   "id": "wheel-of-destiny",
   "title": "☯ Wheel Of Destiny",
   "description": "Randomly select a token.",
-  
   "authors": [
     {
       "name": "Mestre Digital",
@@ -10,38 +9,39 @@
       "flags": {}
     }
   ],
-  
-  "version": "0.4.3",
+  "version": "0.4.4",
   "compatibility": {
     "minimum": "14",
-    "verified": "14"
+    "verified": "14",
+    "maximum": "14"
   },
-
-  "scripts": [],
-	"esmodules": ["./scripts/constants.js", "./scripts/init.js"],
-
-  "packs": [],
-
+  "esmodules": [
+    "scripts/constants.js",
+    "scripts/init.js"
+  ],
   "styles": [
-    "css/wheel-of-destiny.css",
-    "styles/base.css",
-    "styles/settings-audio.css",
-    "styles/settings-animation.css",
-    "styles/settings-dialogs.css",
-    "styles/token-picker.css"
+    {
+      "src": "css/wheel-of-destiny.css"
+    },
+    {
+      "src": "styles/base.css"
+    },
+    {
+      "src": "styles/settings-audio.css"
+    },
+    {
+      "src": "styles/settings-animation.css"
+    },
+    {
+      "src": "styles/settings-dialogs.css"
+    },
+    {
+      "src": "styles/token-picker.css"
+    }
   ],
-
-  "languages": [
-
-  ],
-
-  "relationships": {
-    "requires": []
-  },
-
   "socket": true,
-
   "url": "https://github.com/brunocalado/wheel-of-destiny",
   "manifest": "https://raw.githubusercontent.com/brunocalado/wheel-of-destiny/main/module.json",
-  "download": "https://codeload.github.com/brunocalado/wheel-of-destiny/zip/main"
+  "download": "https://codeload.github.com/brunocalado/wheel-of-destiny/zip/main",
+  "flags": {}
 }

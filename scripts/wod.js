@@ -7,6 +7,7 @@
  */
 import { MODULE_ID } from "./constants.js";
 import TokenPickerForm from "./token-picker.js";
+import { pingToken } from "./helpers.js";
 
 export default class WoD {
 
@@ -323,13 +324,7 @@ export default class WoD {
   //-----------------------------------------------
   // Pan and Ping Token
   panAndPingToken(selectedToken) {
-    const origin = selectedToken.center;
-    const options = {
-      scene: canvas.scene.id,
-      pull: true,
-      style: CONFIG.Canvas.pings.types.PULL
-    };
-    canvas.ping(origin, options);
+    pingToken(selectedToken);
   }
 
   // --------------------------------------------------
@@ -355,15 +350,19 @@ export default class WoD {
     const myContent = await foundry.applications.handlebars.renderTemplate(`modules/${MODULE_ID}/templates/chat.hbs`, templateData);
     const privacy = game.settings.get(MODULE_ID, "chatMessagePrivacy");
 
+    // `rolls` defaults to [] regardless, but some systems' ChatMessage document-class
+    // overrides (e.g. Daggerheart's DhpChatMessage.migrateData) read source.rolls.length
+    // during document creation without guarding for it being absent — passing it
+    // explicitly here avoids a crash on this flavor-only message, which never had a roll.
     if (privacy=='gmonly') {
       // Addressed to the GMs rather than to game.user: a player's draw would otherwise
       // whisper the result to the player alone. The author sees their own whisper either
       // way, so the drawing user still gets the message.
       ChatMessage.create({
-       content: myContent, whisper: ChatMessage.getWhisperRecipients("GM").map(u => u.id)
+       content: myContent, rolls: [], whisper: ChatMessage.getWhisperRecipients("GM").map(u => u.id)
       });
     } else {
-      ChatMessage.create({ content: myContent });
+      ChatMessage.create({ content: myContent, rolls: [] });
     }
   }
 

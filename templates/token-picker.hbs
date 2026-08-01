@@ -8,6 +8,8 @@
 
   <header class="wod-picker-bar">
     <span class="wod-picker-summary" data-summary>0 selected</span>
+    <i class="fas fa-question wod-help-icon"
+       data-tooltip="Shift+click a token on the canvas to add or remove it from the pool. A plain click replaces your whole canvas selection with just that token."></i>
     <button type="button" data-action="resetFilters"><i class="fas fa-rotate-left"></i> Reset</button>
     <button type="button" data-action="selectAll"><i class="fas fa-check-double"></i> All</button>
     <button type="button" data-action="selectNone"><i class="fas fa-xmark"></i> None</button>
@@ -70,12 +72,16 @@
       <span class="wod-token-badges">
         {{#if this.linked}}
         <span class="wod-badge wod-badge--user" data-tooltip="{{this.userNames}}">
-          <i class="fas fa-user" inert></i>{{this.userNames}}
+          <i class="fas fa-user" inert></i>
         </span>
         {{/if}}
         <span class="wod-badge wod-badge--type">{{this.actorTypeLabel}}</span>
-        <span class="wod-badge wod-badge--{{this.dispositionKey}}">{{this.dispositionLabel}}</span>
+        <span class="wod-badge wod-badge--{{this.dispositionKey}}" data-tooltip="{{this.dispositionLabel}}">{{this.dispositionEmoji}}</span>
       </span>
+      <button type="button" class="wod-token-locate" data-action="locateToken"
+              data-token-id="{{this.id}}" data-tooltip="Pan to this token">
+        <i class="fas fa-magnifying-glass" inert></i>
+      </button>
     </label>
     {{/each}}
   </section>
