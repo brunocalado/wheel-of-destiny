@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.4.5
+
+- css fix
+- assets updated 
+
 ## 0.4.4
 
 - The Choose Tokens picker now remembers its filters, window position, and window size per client between openings. If the remembered filters would leave nothing to select in the current scene, they reset to their defaults instead of opening onto an empty pool.

@@ -18,7 +18,7 @@ One click, and the module randomly picks a token: it glows on the canvas, the wh
 - 🔍 **Filters the scene for you.** The picker filters by actor type, disposition, whether a player is linked to the actor, and whether the token is hidden. Click **Hostile** and only the hostiles are in the draw — no hunting through the list.
 - 🖱️ **Or just click tokens on the map.** While the picker's open, canvas and list stay in sync — control a token to add it to the draw, release it to drop it, and the filters widen automatically to let it in.
 - 🎡 **Spins a roulette.** An optional "Native Glow" animation hops from token to token on the canvas before locking onto the winner. No extra modules needed.
-- 🔊 **Plays a random sound.** Point it at a folder of sounds and it picks one at random every spin. Four evil laughs are included to get you started.
+- 🔊 **Plays a random sound.** Point it at a folder of sounds and it picks one at random every spin. An evil laugh is included to get you started.
 - 💬 **Announces the result in chat.** Keep it as a secret whisper to the GM, or show the whole table who got picked.
 - 🖼️ **Reveals the chosen one on screen.** A fullscreen image of the token pops up for **everyone** — and fades away on its own after a few seconds.
 - 📍 **Targets and pings the winner.** The camera pans to the token so nobody misses the moment.
