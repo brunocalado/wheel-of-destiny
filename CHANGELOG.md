@@ -10,6 +10,7 @@
 - Removed core's orange focus/active ring from the buttons inside the module's own windows, where it lingered after every click and stuck permanently to anything carrying the `active` class. Scoped to the module — core's UI, the system and every other module keep theirs.
 - Gave the secondary buttons a hover state (Reset/All/None in the picker, Preview Sound in the audio settings): the accent on the border and the label over a lighter surface, matching the picker's icon buttons. They had none of their own and were relying on core's, which the module opts out of. A disabled Draw button no longer brightens under the pointer either.
 - Squared off the picker's filter chips: a 4px soft corner instead of a full pill, matching the token rows in the list below. Their labels are now centred by flexbox over a `line-height: 1` box rather than by leading, which had been placing the text 1.7px above the middle of every chip and segment button.
+- https://github.com/brunocalado/wheel-of-destiny/issues/14
 
 ## 0.4.5
 
