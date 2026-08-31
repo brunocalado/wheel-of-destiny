@@ -14,6 +14,24 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const NO_ACTOR_TYPE = "__none__";
 
 /**
+ * Bounds for how many chances one row can hold. One is the floor rather than zero because
+ * a token with no chances is a token that is not in the draw, and unticking the row
+ * already says exactly that — a 0% row sitting in the pool would be a second, quietly
+ * contradictory way to say it. The ceiling is arbitrary; it keeps the column's width
+ * honest and a leaned-on `+` harmless.
+ */
+const MIN_CHANCES = 1;
+const MAX_CHANCES = 99;
+
+/**
+ * The TokenDocument fields a row is built from. An update touching none of them changes
+ * nothing the picker shows — token movement, most of all, which updates `x`/`y` on every
+ * frame of a drag — so it is not worth rebuilding the list for.
+ * @type {string[]}
+ */
+const DISPLAYED_TOKEN_FIELDS = ["name", "texture", "disposition", "hidden", "actorId"];
+
+/**
  * Scene token browser used to build the pool for a draw.
  *
  * Opened whenever a GM triggers a draw without a pool already staged on the canvas.
@@ -40,6 +58,19 @@ const NO_ACTOR_TYPE = "__none__";
  * restored on close, so this takeover never leaks into `WoD.randomToken()`'s own use of
  * `canvas.tokens.controlled`.
  *
+ * The list is rebuilt in place whenever the scene's tokens change underneath it — one
+ * added, one deleted, or one edited in a way a row shows. Without that the window would
+ * keep offering a token that no longer exists and stay blind to one just dropped on the
+ * map. A rebuild keeps the pool as the GM left it (see `#reapplySelection`) rather than
+ * re-deriving it from the filters, which would throw away every manual exception.
+ *
+ * Membership is not the whole story: each row also carries a number of chances — one by
+ * default, stepped with the `+`/`-` buttons in its chance column — and the column shows
+ * the odds those chances buy against everything else currently in the pool, recomputed on
+ * every change. They are session state rather than a remembered setting on purpose:
+ * weighting answers "who is this creature most likely to swing at *right now*", which is
+ * not a thing to carry into the next draw.
+ *
  * `BASE_APPLICATION` is deliberately left alone: this is a leaf class, so ApplicationV2
  * must stay the floor of the DEFAULT_OPTIONS merge chain.
  */
@@ -47,7 +78,7 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
 
   /**
    * Settles the promise handed out by `open()`.
-   * @type {?function(Token[]|null): void}
+   * @type {?function({tokens: Token[], weights: Map<string, number>}|null): void}
    */
   #resolve;
 
@@ -60,6 +91,20 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
    * @type {?function(Token, boolean): void}
    */
   #controlTokenHook = null;
+
+  /**
+   * The scene-token hooks that keep the list current, kept so they can be removed again
+   * on close — an unremoved hook would keep firing into a dead app.
+   * @type {Array<{event: string, callback: Function}>}
+   */
+  #sceneHooks = [];
+
+  /**
+   * The pool captured just before a refresh re-render, so the rebuilt list can be put back
+   * the way the GM left it. Null except across that one render.
+   * @type {?{ticked: Set<string>, known: Set<string>}}
+   */
+  #pendingSelection = null;
 
   /**
    * Whatever was controlled on canvas before the picker took over selection, so `_onClose`
@@ -76,6 +121,15 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
    * `controlToken` hooks that provokes are not mistaken for the GM's own canvas click.
    */
   #syncingCanvas = false;
+
+  /**
+   * Draw chances per token id, for the rows stepped away from the default only. Holding
+   * just the exceptions is what lets `#chancesOf` answer for a token the picker has never
+   * been told anything about — including every row of a freshly opened window — without
+   * the map having to be seeded from, or kept in step with, the token list.
+   * @type {Map<string, number>}
+   */
+  #chances = new Map();
 
   /**
    * Debounce handle for `#savePosition` — dragging and resizing call `setPosition`
@@ -96,9 +150,10 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
     classes: [MODULE_ID, "wod-token-picker"],
     // Narrower than a first guess would land on: badges and names already truncate with
     // an ellipsis, so the list stays readable while leaving more of the canvas visible
-    // behind it. Only a starting point — `open()` overrides it with whatever the client
-    // last resized the window to, once one has been remembered.
-    position: { width: 420, height: 560 },
+    // behind it — wide enough for the chance column and no wider. Only a starting point —
+    // `open()` overrides it with whatever the client last resized the window to, once one
+    // has been remembered.
+    position: { width: 480, height: 560 },
     window: {
       title: "Choose Tokens — Wheel of Destiny",
       icon: "fas fa-yin-yang",
@@ -112,7 +167,9 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
       resetFilters: this.prototype._onResetFilters,
       toggleFilter: this.prototype._onToggleFilter,
       setFilter: this.prototype._onSetFilter,
-      locateToken: this.prototype._onLocateToken
+      locateToken: this.prototype._onLocateToken,
+      increaseChance: this.prototype._onIncreaseChance,
+      decreaseChance: this.prototype._onDecreaseChance
     }
   };
 
@@ -125,7 +182,8 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
 
   /**
    * Opens the picker and waits for the GM to commit a pool.
-   * @returns {Promise<Token[]|null>} The chosen tokens, or `null` if the window was
+   * @returns {Promise<{tokens: Token[], weights: Map<string, number>}|null>} The chosen
+   *   tokens and how many chances each of them was given, or `null` if the window was
    *   dismissed or one was already open.
    */
   static async open() {
@@ -258,7 +316,62 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
     // while the picker is open should register the same way ticking its row would.
     this.#controlTokenHook = (token, controlled) => this.#onControlToken(token, controlled);
     Hooks.on("controlToken", this.#controlTokenHook);
+
+    // The rows are built from canvas.tokens.placeables at render time, so the list goes
+    // stale the moment the scene changes under it. These three put it back in step.
+    this.#watchSceneTokens("createToken", document => this.#isCurrentScene(document));
+    this.#watchSceneTokens("deleteToken", document => this.#isCurrentScene(document));
+    this.#watchSceneTokens("updateToken", (document, changed) => this.#isCurrentScene(document)
+      && DISPLAYED_TOKEN_FIELDS.some(field => field in changed));
   }
+
+  /**
+   * Registers one scene-token hook that rebuilds the list whenever `test` passes, and
+   * keeps it for removal on close.
+   * @param {string} event A document hook name.
+   * @param {function(...*): boolean} test Receives the hook's own arguments.
+   * @returns {void}
+   */
+  #watchSceneTokens(event, test) {
+    const callback = (...args) => { if (test(...args)) this.#refreshTokenList(); };
+    Hooks.on(event, callback);
+    this.#sceneHooks.push({ event, callback });
+  }
+
+  /**
+   * Whether a TokenDocument belongs to the scene the picker is listing. The document hooks
+   * fire for every scene in the world, including ones nobody is looking at.
+   * @param {TokenDocument} document
+   * @returns {boolean}
+   */
+  #isCurrentScene(document) {
+    return document.parent?.id === canvas.scene?.id;
+  }
+
+  /**
+   * Rebuilds the row list from the scene as it now stands.
+   *
+   * Debounced because the hooks behind it fire once per document: deleting a group of
+   * tokens, or dropping several at once, would otherwise re-render the window once per
+   * token in the batch. The pool is captured here rather than in `_onRender` because by
+   * then the old rows are already gone.
+   * @returns {void}
+   */
+  #refreshTokenList = foundry.utils.debounce(() => {
+    if (!this.rendered) return;
+
+    const inputs = [...this.element.querySelectorAll("input[name='tokenId']")];
+    this.#pendingSelection = {
+      ticked: new Set(inputs.filter(input => input.checked).map(input => input.value)),
+      known: new Set(inputs.map(input => input.value))
+    };
+
+    this.render().catch(err => {
+      // Leaving this set would make the next ordinary render take the refresh path.
+      this.#pendingSelection = null;
+      console.error(`${MODULE_ID} | Failed to refresh the token picker's list.`, err);
+    });
+  }, 100);
 
   /**
    * Restores the filter state remembered from the last time the picker was open, then
@@ -273,11 +386,59 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
   _onRender(context, options) {
     super._onRender(context, options);
     this.#restoreFilterState();
+
+    // A rebuild after a scene change, not a fresh open: the pool is restored rather than
+    // re-derived, and the empty-pool fallback below is not this render's business — the
+    // filters are whatever the GM has since chosen, and an empty scene is a fact about the
+    // scene, not a sign of a stale setting worth resetting.
+    if (this.#pendingSelection) {
+      this.#reapplySelection();
+      this.#pendingSelection = null;
+      return;
+    }
+
     this.#applyFilters();
 
     if (this.#selectedInputs().length === 0) {
       ui.notifications.warn("☯ " + "The saved filters matched no tokens in this scene — filters were reset.");
       this._onResetFilters();
+    }
+  }
+
+  /**
+   * Puts the pool back over a freshly rebuilt list.
+   *
+   * A row that was already on screen keeps exactly what the GM had done to it, so the
+   * hand-unticked exceptions that `#applyFilters` would have swept away survive a token
+   * being added or deleted elsewhere in the scene. A row that is new to the list has no
+   * such history, so it follows the filters — the same rule every row was opened under.
+   * @returns {void}
+   */
+  #reapplySelection() {
+    const { ticked, known } = this.#pendingSelection;
+    const matches = this.#buildFilterPredicate();
+
+    for (const row of this.element.querySelectorAll(".wod-token-row")) {
+      const input = row.querySelector("input[name='tokenId']");
+      const show = matches(row.dataset);
+      row.classList.toggle("wod-row--filtered", !show);
+      input.checked = show && (known.has(input.value) ? ticked.has(input.value) : true);
+    }
+
+    this.#pruneChances();
+    this.#updateSummary();
+  }
+
+  /**
+   * Drops the chances held for tokens that are no longer in the scene. Ids are never
+   * reused, so a stale entry can only ever be dead weight.
+   * @returns {void}
+   */
+  #pruneChances() {
+    const present = new Set([...this.element.querySelectorAll("input[name='tokenId']")]
+      .map(input => input.value));
+    for (const tokenId of this.#chances.keys()) {
+      if (!present.has(tokenId)) this.#chances.delete(tokenId);
     }
   }
 
@@ -307,7 +468,7 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
 
   /**
    * Resolves the pending `open()` promise, once.
-   * @param {Token[]|null} result
+   * @param {{tokens: Token[], weights: Map<string, number>}|null} result
    * @returns {void}
    */
   #settle(result) {
@@ -332,6 +493,8 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
       Hooks.off("controlToken", this.#controlTokenHook);
       this.#controlTokenHook = null;
     }
+    for (const { event, callback } of this.#sceneHooks) Hooks.off(event, callback);
+    this.#sceneHooks = [];
     // The hook is already off, so this cannot loop back through #onControlToken.
     this.#restoreCanvasSelection();
     TokenPickerForm.#current = null;
@@ -407,17 +570,81 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
   }
 
   /**
-   * Refreshes the pool count and the Draw button's enabled state, then makes the canvas
-   * selection match — every path that can change the pool (filter changes, All/None, a
-   * manual tick, a canvas click) already funnels through here, so this is the one place
-   * that needs to keep the map in sync with it.
+   * Refreshes the pool count, the Draw button's enabled state and the odds in the chance
+   * column, then makes the canvas selection match — every path that can change the pool
+   * (filter changes, All/None, a manual tick, a canvas click) already funnels through
+   * here, so this is the one place that needs to keep the map, and everyone's odds, in
+   * sync with it.
    * @returns {void}
    */
   #updateSummary() {
-    const selected = this.#selectedInputs().length;
-    this.element.querySelector("[data-summary]").textContent = `${selected} selected`;
-    this.element.querySelector("[data-action='draw']").disabled = selected < 1;
+    const selected = this.#selectedInputs();
+    this.element.querySelector("[data-summary]").textContent = `${selected.length} selected`;
+    this.element.querySelector("[data-action='draw']").disabled = selected.length < 1;
+    this.#updateChances(selected);
     this.#syncCanvasSelection();
+  }
+
+  /**
+   * How many chances one token gets in the draw.
+   * @param {string} tokenId
+   * @returns {number}
+   */
+  #chancesOf(tokenId) {
+    return this.#chances.get(tokenId) ?? MIN_CHANCES;
+  }
+
+  /**
+   * Adds or removes one chance from a row, within the bounds, and re-derives the whole
+   * column — one row's count moves what every other row in the pool is worth.
+   *
+   * Membership is deliberately left alone: stepping an unticked row up sets what that
+   * token would be worth once it joins the draw, and nothing more. Ticking rows in and out
+   * is already what the checkbox, the filters and the canvas are for, and quietly doing it
+   * from here would make a misclicked `+` a change to the pool rather than to one number.
+   * @param {string} tokenId
+   * @param {number} delta
+   * @returns {void}
+   */
+  #stepChances(tokenId, delta) {
+    const next = Math.min(MAX_CHANCES, Math.max(MIN_CHANCES, this.#chancesOf(tokenId) + delta));
+    // Storing the default would cost `#chances` its meaning as "the rows that were changed".
+    if (next === MIN_CHANCES) this.#chances.delete(tokenId);
+    else this.#chances.set(tokenId, next);
+    this.#updateChances();
+  }
+
+  /**
+   * Rewrites the chance column. A row in the draw shows the odds its chances buy it there;
+   * a row outside the draw shows the bare count instead, because the 0% that is technically
+   * true of it would read as "this one can never come up" rather than "this one is not in
+   * the pool" — and would also hide the count the GM had set for it.
+   * @param {HTMLInputElement[]} [selected] The pool, when the caller has already resolved it.
+   * @returns {void}
+   */
+  #updateChances(selected = this.#selectedInputs()) {
+    const pool = new Set(selected.map(input => input.value));
+    const total = selected.reduce((sum, input) => sum + this.#chancesOf(input.value), 0);
+
+    for (const row of this.element.querySelectorAll(".wod-token-row")) {
+      const tokenId = row.querySelector("input[name='tokenId']").value;
+      const chances = this.#chancesOf(tokenId);
+      const inPool = pool.has(tokenId);
+      const value = row.querySelector("[data-chance-value]");
+
+      // `total` is only ever 0 when the pool is empty, and then nothing is `inPool`.
+      const percent = inPool ? (chances / total) * 100 : 0;
+      value.textContent = inPool
+        // A long shot in a big pool still has a real chance; "0%" would deny it.
+        ? (percent < 0.5 ? "<1%" : `${Math.round(percent)}%`)
+        : `×${chances}`;
+      value.dataset.tooltip = inPool
+        ? `${chances} of ${total} chances in the draw`
+        : `${chances} ${chances === 1 ? "chance" : "chances"} — not in the draw`;
+
+      row.querySelector("[data-action='increaseChance']").disabled = chances >= MAX_CHANCES;
+      row.querySelector("[data-action='decreaseChance']").disabled = chances <= MIN_CHANCES;
+    }
   }
 
   /**
@@ -619,13 +846,16 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
   }
 
   /**
-   * Returns every filter to "match anything", which re-selects the whole scene.
+   * Returns every filter to "match anything", which re-selects the whole scene, and puts
+   * every row back to a single chance. Reset is the one control that means "as the window
+   * opens", and it opens with the whole scene in the draw and nobody favored.
    * Registered as the `resetFilters` action.
    * @param {PointerEvent} event
    * @param {HTMLElement} target
    * @returns {void}
    */
   _onResetFilters(event, target) {
+    this.#chances.clear();
     for (const chip of this.element.querySelectorAll(".wod-chip")) {
       chip.setAttribute("aria-pressed", "true");
     }
@@ -636,7 +866,8 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
   }
 
   /**
-   * Commits the pool and closes. Registered as the `draw` action.
+   * Commits the pool, and how many chances each of its tokens holds, then closes.
+   * Registered as the `draw` action.
    * @param {PointerEvent} event
    * @param {HTMLElement} target
    * @returns {Promise<void>}
@@ -652,7 +883,11 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
       return;
     }
 
-    this.#settle(tokens);
+    // Written out for every token rather than only the stepped-up ones, so no caller has
+    // to know that a missing entry means one chance — see `WoD#selectRandomToken`.
+    const weights = new Map(tokens.map(token => [token.id, this.#chancesOf(token.id)]));
+
+    this.#settle({ tokens, weights });
     await this.close();
   }
 
@@ -688,5 +923,27 @@ export default class TokenPickerForm extends HandlebarsApplicationMixin(Applicat
     const token = canvas.tokens.get(target.dataset.tokenId);
     if (!token) return;
     pingToken(token);
+  }
+
+  /**
+   * Gives one row an extra chance in the draw. Registered as the `increaseChance` action;
+   * like the locate button it sits inside the row's `<label>`, so clicking it steps the
+   * count without also toggling that row's checkbox.
+   * @param {PointerEvent} event
+   * @param {HTMLElement} target
+   * @returns {void}
+   */
+  _onIncreaseChance(event, target) {
+    this.#stepChances(target.dataset.tokenId, 1);
+  }
+
+  /**
+   * Takes one chance back off a row. Registered as the `decreaseChance` action.
+   * @param {PointerEvent} event
+   * @param {HTMLElement} target
+   * @returns {void}
+   */
+  _onDecreaseChance(event, target) {
+    this.#stepChances(target.dataset.tokenId, -1);
   }
 }

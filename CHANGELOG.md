@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 0.4.6
+
+- The Choose Tokens picker can now weight the draw. Every row ends in a chance column — **+**, the odds, **−** — where each token starts with a single chance and an even share of the draw, `+` gives it another and `−` takes one back, down to a floor of one. The percentages of everyone in the draw are recalculated on every change, so three chances against one other token reads as the 75% it is. A row that is out of the draw shows what it is worth (`×3`) instead of a percentage, so nothing set is lost by unticking it or filtering it out. The buttons only ever change that number — they never add a token to the draw or drop it from one. Chances last as long as the window does; **Reset** clears them along with the filters.
+- The Choose Tokens list now follows the scene while it is open. A token added to the scene appears in the list (joining the draw if it passes the active filters), a deleted one leaves it, and an edit to a token's name, art, disposition, visibility or actor is reflected on its row. Previously the list was built once when the window opened, so a deleted token stayed on offer for the draw and a newly placed one never showed up. The pool is preserved across the rebuild — hand-unticked rows stay unticked and every chance is kept — and only the fields the list actually shows trigger it, so dragging a token around the map costs nothing. A batch of tokens created or deleted at once rebuilds the list once, not once per token.
+- `WoD.randomToken()` and `WoD.selectRandomToken()` now take those chances as an optional weights map keyed by token id (a `Map` or a plain object; anything left out gets a single chance) — `WoD.randomToken(list, { weights })` and `WoD.selectRandomToken(list, weights)`. Called without one, both stay exactly as uniform as they were.
+- Added `WoD.promptForPool()`: the same picker as `WoD.promptForTokens()`, but it hands back `{ tokens, weights }` so the chances survive the trip to `WoD.randomToken()`. `WoD.promptForTokens()` still returns a plain token list.
+- Widened the picker's default window width (420px → 480px) to fit the chance column. A window that has already been resized keeps whatever width it was left at.
+- Removed core's orange focus/active ring from the buttons inside the module's own windows, where it lingered after every click and stuck permanently to anything carrying the `active` class. Scoped to the module — core's UI, the system and every other module keep theirs.
+- Gave the secondary buttons a hover state (Reset/All/None in the picker, Preview Sound in the audio settings): the accent on the border and the label over a lighter surface, matching the picker's icon buttons. They had none of their own and were relying on core's, which the module opts out of. A disabled Draw button no longer brightens under the pointer either.
+- Squared off the picker's filter chips: a 4px soft corner instead of a full pill, matching the token rows in the list below. Their labels are now centred by flexbox over a `line-height: 1` box rather than by leading, which had been placing the text 1.7px above the middle of every chip and segment button.
+
 ## 0.4.5
 
 - css fix

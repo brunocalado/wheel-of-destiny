@@ -1,15 +1,20 @@
 {{! Rendered by TokenPickerForm. Filtering is done client-side against the data-*
-    attributes on each row, so the list is built once and never re-rendered.
+    attributes on each row, so the list is re-rendered only when the scene's tokens
+    actually change (see TokenPickerForm#refreshTokenList) — never for a filter change.
 
     Filter state lives on the buttons themselves as aria-pressed rather than in form
     inputs: the chips toggle freely, each segment group allows exactly one, and both
-    read back the same way. See TokenPickerForm#applyFilters. }}
+    read back the same way. See TokenPickerForm#applyFilters.
+
+    The chance column is written the same way: the counts live in the app, not the markup,
+    and TokenPickerForm#updateChances fills every [data-chance-value] on each pool change.
+    The placeholder below is only what one frame of a fresh render would show. }}
 <div class="wod-picker-body">
 
   <header class="wod-picker-bar">
     <span class="wod-picker-summary" data-summary>0 selected</span>
     <i class="fas fa-question wod-help-icon"
-       data-tooltip="Shift+click a token on the canvas to add or remove it from the pool. A plain click replaces your whole canvas selection with just that token."></i>
+       data-tooltip="Shift+click a token on the canvas to add or remove it from the pool. A plain click replaces your whole canvas selection with just that token.&#10;&#10;Use + and &minus; on a row to give that token more or fewer chances in the draw. The % is its live odds against everyone else in the pool."></i>
     <button type="button" data-action="resetFilters"><i class="fas fa-rotate-left"></i> Reset</button>
     <button type="button" data-action="selectAll"><i class="fas fa-check-double"></i> All</button>
     <button type="button" data-action="selectNone"><i class="fas fa-xmark"></i> None</button>
@@ -77,6 +82,17 @@
         {{/if}}
         <span class="wod-badge wod-badge--type">{{this.actorTypeLabel}}</span>
         <span class="wod-badge wod-badge--{{this.dispositionKey}}" data-tooltip="{{this.dispositionLabel}}">{{this.dispositionEmoji}}</span>
+      </span>
+      <span class="wod-token-chance">
+        <button type="button" class="wod-chance-step" data-action="increaseChance"
+                data-token-id="{{this.id}}" data-tooltip="One more chance in the draw">
+          <i class="fas fa-plus" inert></i>
+        </button>
+        <span class="wod-chance-value" data-chance-value>&mdash;</span>
+        <button type="button" class="wod-chance-step" data-action="decreaseChance"
+                data-token-id="{{this.id}}" data-tooltip="One less chance in the draw">
+          <i class="fas fa-minus" inert></i>
+        </button>
       </span>
       <button type="button" class="wod-token-locate" data-action="locateToken"
               data-token-id="{{this.id}}" data-tooltip="Pan to this token">

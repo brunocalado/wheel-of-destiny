@@ -17,6 +17,8 @@ One click, and the module randomly picks a token: it glows on the canvas, the wh
 - 🎯 **Picks a random token for you.** Select a few tokens and it draws from those. Select nothing and it opens a picker listing every token in the scene, so you choose exactly who's in the draw.
 - 🔍 **Filters the scene for you.** The picker filters by actor type, disposition, whether a player is linked to the actor, and whether the token is hidden. Click **Hostile** and only the hostiles are in the draw — no hunting through the list.
 - 🖱️ **Or just click tokens on the map.** While the picker's open, canvas and list stay in sync — control a token to add it to the draw, release it to drop it, and the filters widen automatically to let it in.
+- 🔄 **Keeps up with the scene.** Add a token, delete one, or change its name or disposition with the picker open and the list updates itself — without losing the pool you had already built.
+- ⚖️ **Load the dice.** Some victims are more deserving than others. Give a token extra chances with **+** and the picker shows everyone's live odds — the brute swings at whoever's in his face, but there's still a chance he goes for the guy who insulted his mother.
 - 🎡 **Spins a roulette.** An optional "Native Glow" animation hops from token to token on the canvas before locking onto the winner. No extra modules needed.
 - 🔊 **Plays a random sound.** Point it at a folder of sounds and it picks one at random every spin. An evil laugh is included to get you started.
 - 💬 **Announces the result in chat.** Keep it as a secret whisper to the GM, or show the whole table who got picked.
@@ -66,7 +68,19 @@ Start a draw without staging a selection and this opens, listing every token in 
 
 If your remembered filters would leave nothing to pick from in the current scene, they reset to their defaults instead of opening onto an empty draw.
 
-Need an exception? Untick any token by hand — or click it right on the canvas. While the window is open, canvas and picker selection track each other: controlling a token on the map ticks its row, widening whatever filter was hiding it if needed, and releasing it unticks the row again. Shift+click adds or removes a token without losing the rest of your canvas selection; a plain click replaces it, same as it always has. Each row also has a 🔍 button to pan the camera straight to that token. **All** and **None** work on what's currently shown, **Reset** puts every filter back, and **Draw** spins with whatever's left.
+Need an exception to the filters? Untick any token by hand — or click it right on the canvas. While the window is open, canvas and picker selection track each other: controlling a token on the map ticks its row, widening whatever filter was hiding it if needed, and releasing it unticks the row again. Shift+click adds or removes a token without losing the rest of your canvas selection; a plain click replaces it, same as it always has. Each row also has a 🔍 button to pan the camera straight to that token. **All** and **None** work on what's currently shown, **Reset** puts every filter back, and **Draw** spins with whatever's left.
+
+**The list follows the scene.** Drop a token on the map with the window open and it shows up in the list; if it passes your current filters it joins the draw straight away. Delete one and it leaves. Rename a token, hide it, or flip its disposition and its row updates to match. Whatever you had already set stays put — rows you unticked by hand stay unticked, and every chance you assigned is kept.
+
+**Not everyone has to be equally likely.** Every row ends in a chance column — **+**, the odds, **−**. Each token starts with one chance and an even share of the draw; **+** gives it another, **−** takes one back, and the percentages of everyone in the draw are recalculated on the spot. Three chances against one other token is a 75% chance of being picked, and that is exactly what the column will say.
+
+| | |
+|---|---|
+| **+** | One more chance in the draw |
+| **%** | This token's live odds, against everyone currently ticked |
+| **−** | One less chance, down to a floor of one |
+
+A row that is not in the draw shows what it is worth (`×3`) instead of a percentage, so nothing you set is lost when you untick it or filter it out — tick it back and its chances count again. The buttons only ever change that number: they never add a token to the draw or drop it from one, which is what the checkbox, the filters and the canvas are for. Chances last as long as the window does — every draw starts fresh, with nobody favored. **Reset** clears them too, along with the filters.
 
 ## ⚙️ Settings
 
@@ -106,16 +120,32 @@ WoD.openTokenPicker();
 const mySelectedToken = await WoD.randomToken(myTokenList);
 ```
 
-**Just pick one, no bells and whistles.** Returns a token from your list and nothing else happens.
+**Spin with your own odds.** Same thing, but some tokens get more than one chance — keyed by token id, exactly like the picker's chance column. Anything you leave out gets a single chance.
+
+```js
+const mySelectedToken = await WoD.randomToken(myTokenList, {
+  weights: { [bigBad.id]: 5, [theRogue.id]: 3 }   // a Map works too
+});
+```
+
+**Just pick one, no bells and whistles.** Returns a token from your list and nothing else happens. Takes the same optional weights.
 
 ```js
 const mySelectedToken = WoD.selectRandomToken(myTokenList);
+const loadedPick = WoD.selectRandomToken(myTokenList, { [bigBad.id]: 5 });
 ```
 
 **Ask for a list of tokens without spinning.** Opens the picker and hands back what you chose, or `null` if you closed it. GM only.
 
 ```js
 const myTokenList = await WoD.promptForTokens();
+```
+
+**Ask for the pool *and* the chances the GM set on it.** Same picker, but nothing is thrown away — hand both straight to `randomToken`. GM only.
+
+```js
+const pool = await WoD.promptForPool();      // { tokens, weights } or null
+if (pool) await WoD.randomToken(pool.tokens, { weights: pool.weights });
 ```
 
 > ⚠️ **Coming from an older version?**

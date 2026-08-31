@@ -35,9 +35,15 @@ export default class WoD {
    * picker is opened to build one — there is no automatic pool any more.
    *
    * @param {Token[]} [customTokenList] An explicit pool, for macros. Bypasses the picker.
+   * @param {object} [options]
+   * @param {Map<string, number>|Object<string, number>|null} [options.weights] How many
+   *   chances each token of `customTokenList` gets, keyed by token id. Omit it and every
+   *   token is equally likely. Ignored wherever `customTokenList` is: when the pool comes
+   *   from the picker, which brings its own chance column along with the tokens, and when
+   *   the drawing user is a player, who always draws from their own targets.
    * @returns {Promise<Token|void>} The drawn token, or nothing if there was nothing to draw.
    */
-  async randomToken(customTokenList=[]) {
+  async randomToken(customTokenList=[], { weights=null }={}) {
     let tokens = canvas.tokens.controlled; // tokens
 
     const flagDialog = game.settings.get(MODULE_ID, "hasDialog");
@@ -53,8 +59,12 @@ export default class WoD {
     if (!game.user.isGM) {
       // Non-GM draws are restricted to the user's own targets. The picker reaches every
       // token in the scene, which is not a player's to draw from, so it is skipped here —
-      // as is customTokenList, which would otherwise let a macro widen the pool.
+      // as is customTokenList, which would otherwise let a macro widen the pool. `weights`
+      // goes with it: it describes a pool this branch just threw away, so honoring it would
+      // mean a macro still had a say in a draw that is meant to be the player's targets and
+      // nothing else.
       tokens = [...game.user.targets]; // Set → Array
+      weights = null;
       if (tokens.length < 1) {
         ui.notifications.notify( '☯ ' + 'You must target at least one token first.', 'error', {permanent: false});
         return;
@@ -63,14 +73,15 @@ export default class WoD {
       tokens = customTokenList;
     } else if (tokens.length < 2) {
       // Nothing meaningful to draw between, so the GM builds the pool in the picker.
-      const picked = await this.promptForTokens();
-      if (!picked) return;
-      tokens = picked;
+      const pool = await this.promptForPool();
+      if (!pool) return;
+      tokens = pool.tokens;
+      weights = pool.weights;
     } // end customTokenList
 
     // --------------------------------------------------
     // Select a Random Token
-    const selectedToken = this.selectRandomToken(tokens);
+    const selectedToken = this.selectRandomToken(tokens, weights);
     const tokenName = selectedToken.document.name;
 
     // Target Token — use public API instead of private _onUpdateTokenTargets
@@ -329,9 +340,42 @@ export default class WoD {
 
   // --------------------------------------------------
   // Select a Random Token
-  selectRandomToken(tokens) {
-    const rand = Math.floor(Math.random() * tokens.length);
-    return tokens[rand];
+
+  /**
+   * Picks one token, honoring per-token chances when there are any.
+   *
+   * `weights` says how many entries a token gets in the draw — the count the picker's
+   * chance column steps up and down. Anything missing, unreadable as a number, or below
+   * one counts as a single chance, so a partial map is safe to pass and an absent one
+   * leaves every token equally likely, which is what a bare `selectRandomToken(list)`
+   * has always done.
+   *
+   * @param {Token[]} tokens
+   * @param {Map<string, number>|Object<string, number>|null} [weights] Keyed by token id.
+   * @returns {Token}
+   */
+  selectRandomToken(tokens, weights=null) {
+    if (!weights) return tokens[Math.floor(Math.random() * tokens.length)];
+
+    // Plain objects are accepted alongside Maps because a macro writing one out by hand
+    // reaches for `{ "abc123": 3 }` long before it reaches for a Map.
+    const read = weights instanceof Map ? id => weights.get(id) : id => weights[id];
+
+    const chances = tokens.map(token => {
+      const value = Number(read(token.id));
+      return Number.isFinite(value) && value > 1 ? Math.floor(value) : 1;
+    });
+    const total = chances.reduce((sum, count) => sum + count, 0);
+
+    // Walks the cumulative chances until the roll is spent. `roll` is strictly below
+    // `total`, so the loop always lands on a token; the trailing return covers only a
+    // floating-point edge the arithmetic should never actually reach.
+    let roll = Math.random() * total;
+    for (let i = 0; i < tokens.length; i++) {
+      roll -= chances[i];
+      if (roll < 0) return tokens[i];
+    }
+    return tokens[tokens.length - 1];
   }
 
   // --------------------------------------------------
@@ -370,15 +414,16 @@ export default class WoD {
   // Token Picker
 
   /**
-   * Asks the GM to build a draw pool out of the tokens in the current scene.
+   * Asks the GM to build a draw pool, with its chances, out of the tokens in the current
+   * scene.
    *
    * GM-only by design: the picker lists every token in the scene, which is not a
    * player's to draw from — players stay on the target-based path in `randomToken`.
    *
-   * @returns {Promise<Token[]|null>} The chosen pool, or `null` if it was dismissed or
-   *   there was nothing to choose from.
+   * @returns {Promise<{tokens: Token[], weights: Map<string, number>}|null>} The chosen
+   *   pool, or `null` if it was dismissed or there was nothing to choose from.
    */
-  async promptForTokens() {
+  async promptForPool() {
     if (!game.user.isGM) {
       ui.notifications.notify( '☯ ' + 'Only a GM can choose tokens from the scene.', 'error', {permanent: false});
       return null;
@@ -393,6 +438,21 @@ export default class WoD {
   }
 
   /**
+   * The chosen pool as a plain token list, dropping the chances the picker collected.
+   *
+   * Kept as the documented macro entry point — `WoD.promptForTokens()` has always handed
+   * back an array and still does. Anything that goes on to draw from the result wants
+   * `promptForPool()` instead, so the GM's chance column survives the trip.
+   *
+   * @returns {Promise<Token[]|null>} The chosen tokens, or `null` if the picker was
+   *   dismissed or there was nothing to choose from.
+   */
+  async promptForTokens() {
+    const pool = await this.promptForPool();
+    return pool ? pool.tokens : null;
+  }
+
+  /**
    * Opens the token picker and draws from whatever the GM commits to.
    *
    * Bound to the "Custom Wheel of Destiny" keybinding and published on the `WoD` macro
@@ -402,9 +462,9 @@ export default class WoD {
    * @returns {Promise<Token|void>} The drawn token, or nothing if the picker was dismissed.
    */
   async openTokenPicker() {
-    const tokens = await this.promptForTokens();
-    if (!tokens) return;
-    return this.randomToken(tokens);
+    const pool = await this.promptForPool();
+    if (!pool) return;
+    return this.randomToken(pool.tokens, { weights: pool.weights });
   }
 
 } // END CLASS

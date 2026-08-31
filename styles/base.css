@@ -103,6 +103,29 @@
 }
 
 /* --------------------------------------------------------------------------
+ * Core's button focus/active ring, switched off inside the module.
+ *
+ * Foundry sets `outline` plus a matching `box-shadow` in
+ * --button-focus-outline-color on two global rules: `a.button:focus,
+ * button:focus` and `a.button.active, button.active`. Every button in the
+ * module's windows is caught by them, so a click leaves an orange glow behind
+ * on the toolbar buttons, the filter chips and the chance steppers — and
+ * anywhere the `active` class sticks, so does the glow. These windows already
+ * say "focused" and "on" in their own accent (the chips' aria-pressed border,
+ * the segments' filled option), so the ring is a second, louder answer to a
+ * question that was already answered.
+ *
+ * Scoped to the module's root class, which every window here carries through
+ * DEFAULT_OPTIONS.classes — core's own UI, the system and every other module
+ * keep the ring and the focus behavior that comes with it.
+ * -------------------------------------------------------------------------- */
+
+.wheel-of-destiny :is(a.button, button):is(:focus, .active) {
+  outline: none;
+  box-shadow: none;
+}
+
+/* --------------------------------------------------------------------------
  * Shared window chrome — AudioSettingsForm, AnimationSettingsForm,
  * DialogSettingsForm (settings-<name>.hbs) and TokenPickerForm (token-picker.hbs).
  *
@@ -238,6 +261,23 @@
     border: 1px solid var(--wod-border) !important;
     color: var(--wod-text) !important;
     font-weight: 500;
+    transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  }
+
+  /* The secondary actions — Reset/All/None, and whatever sits beside a settings window's
+   * Save. Core's own button hover is one of the things these windows opt out of, and
+   * turning off the focus ring took the last of it away, so they read as inert until
+   * clicked. This is the same hover the picker's icon buttons use (locate, the chance
+   * steppers): a lighter surface, and the accent on the border and the label.
+   *
+   * `!important` is not decoration here — the rule above sets these same properties with
+   * it, to beat core's button skin, and a plain declaration would lose to it. The primary
+   * action is excluded because it has its own, brighter hover just below. */
+  :is(.wod-settings-footer, .wod-picker-bar)
+    button:not([type="submit"], .wod-draw-button):hover:not(:disabled) {
+    background: var(--wod-header) !important;
+    border-color: var(--wod-accent) !important;
+    color: var(--wod-accent) !important;
   }
 
   /* The primary action of each window: submit for the settings forms, the draw itself
@@ -249,7 +289,7 @@
     font-weight: 600;
   }
 
-  :is(.wod-settings-footer, .wod-picker-bar) :is(button[type="submit"], .wod-draw-button):hover {
+  :is(.wod-settings-footer, .wod-picker-bar) :is(button[type="submit"], .wod-draw-button):hover:not(:disabled) {
     background: var(--wod-accent-hover) !important;
     border-color: var(--wod-accent-hover) !important;
   }

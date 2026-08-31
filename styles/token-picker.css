@@ -165,26 +165,39 @@
   /* --- Filter buttons: chips (multi-choice) and segments (single-choice) --- */
 
   /* Core sizes buttons to a control height meant for form fields, which is far taller
-   * than a filter chip needs — hence the explicit height reset alongside the padding. */
+   * than a filter chip needs — hence the explicit height reset alongside the padding.
+   *
+   * The label is centred by flexbox over a `line-height: 1` box rather than by leading.
+   * A line-height taller than the text (this was 1.7) pads the line box with half-leading
+   * split around the *baseline*, and Signika's ascent and descent are not symmetric about
+   * its glyphs — so the label came out measurably higher than the middle. Collapsing the
+   * line box to the text and centring the box itself removes the asymmetry at the source;
+   * the height the leading used to contribute now comes from real padding, where it is
+   * symmetric by construction. */
   .wod-chip,
   .wod-segment button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     flex: none;
     height: auto !important;
     min-height: 0 !important;
-    padding: 0.1rem 0.5rem !important;
+    padding: 0.35rem 0.55rem !important;
     border: 1px solid var(--wod-border) !important;
     background: var(--wod-input) !important;
     color: var(--wod-text) !important;
     font-size: 0.6875rem;
-    line-height: 1.7;
+    line-height: 1;
     cursor: pointer;
   }
 
+  /* A soft-cornered rectangle rather than the pill this was: at this size a full pill
+   * rounds away most of the chip's own edge, which made a row of them read as one blurred
+   * strip instead of a set of separate controls. 4px matches the token rows in the list
+   * below, so the whole window shares one corner language. */
   .wod-chip {
-    display: inline-flex;
-    align-items: center;
     gap: 0.3rem;
-    border-radius: 999px !important;
+    border-radius: 4px !important;
   }
 
   /* An off chip recedes instead of disappearing, so the set of filters stays readable —
@@ -324,6 +337,70 @@
     align-items: center;
     gap: 0.2rem;
     flex: none;
+  }
+
+  /* --- Chance column --- */
+
+  /* A real column, not just another thing on the row: every cell after the flexible name
+   * is `flex: none`, so one fixed width here holds the stepper — and the locate button
+   * behind it — at the same offset from every row's right edge, however wide that
+   * particular row's badges came out. */
+  .wod-token-chance {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.15rem;
+    flex: none;
+    width: 4.9rem;
+  }
+
+  /* Fixed share of the column and tabular figures, so the two buttons hold still while
+   * the odds tick between "7%" and "100%" underneath the pointer. */
+  .wod-chance-value {
+    flex: 1;
+    color: var(--wod-text);
+    font-size: 0.6875rem;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  /* Same treatment the name gets: a row that is out of the draw still shows what it is
+   * worth, quietly. */
+  .wod-token-row:not(:has(:checked)) .wod-chance-value {
+    color: var(--wod-text-hint);
+  }
+
+  /* The locate button's affordance at a smaller size — two of these, the odds and the
+   * badges all have to share a row that is mostly name. */
+  .wod-chance-step {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 1.2rem;
+    height: 1.2rem !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    border: 1px solid var(--wod-border) !important;
+    border-radius: 3px !important;
+    background: var(--wod-input) !important;
+    color: var(--wod-text-hint) !important;
+    font-size: 0.5625rem;
+    cursor: pointer;
+  }
+
+  .wod-chance-step:hover:not(:disabled) {
+    border-color: var(--wod-accent) !important;
+    background: var(--wod-panel) !important;
+    color: var(--wod-accent) !important;
+  }
+
+  /* At a single chance there is nothing left to take away — unticking the row is how a
+   * token leaves the draw, not stepping it down to nothing. */
+  .wod-chance-step:disabled {
+    opacity: 0.3;
+    cursor: default;
   }
 
   /* Nested inside the row's <label> — clicking it fires its own `data-action` instead of
